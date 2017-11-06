@@ -1,0 +1,8 @@
+# Group (Number and Port)
+LAB_GROUP=X
+LAB_GROUP_PORT=Y
+
+# Robot (ID and IP)
+ROBOT_ID=Z
+ROBOT_IP=W
+

@@ -1,0 +1,137 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes" ?>
+<CodeBlocks_project_file>
+	<FileVersion major="1" minor="6" />
+	<Project>
+		<Option title="robot_agent" />
+		<Option pch_mode="2" />
+		<Option compiler="gcc" />
+		<Build>
+			<Target title="bin">
+				<Option output="bin/robot_agent" prefix_auto="1" extension_auto="1" />
+				<Option object_output="obj/bin/" />
+				<Option type="1" />
+				<Option compiler="gcc" />
+				<Compiler>
+					<Add option="-g" />
+					<Add directory="src" />
+					<Add directory="src/tasks" />
+				</Compiler>
+			</Target>
+		</Build>
+		<Compiler>
+			<Add option="-Wall" />
+			<Add directory="src/tasks" />
+			<Add directory="src/" />
+			<Add directory="." />
+		</Compiler>
+		<Unit filename="lib/iniparser/dictionary.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="lib/iniparser/dictionary.h" />
+		<Unit filename="lib/iniparser/iniparser.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="lib/iniparser/iniparser.h" />
+		<Unit filename="main.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="src/config.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="src/config.h" />
+		<Unit filename="src/debug.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="src/debug.h" />
+		<Unit filename="src/def.h" />
+		<Unit filename="src/doublylinkedlist.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="src/doublylinkedlist.h" />
+		<Unit filename="src/enviroment.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="src/enviroment.h" />
+		<Unit filename="src/file.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="src/file.h" />
+		<Unit filename="src/general.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="src/general.h" />
+		<Unit filename="src/openinterface.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="src/openinterface.h" />
+		<Unit filename="src/pf.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="src/pf.h" />
+		<Unit filename="src/pheromone.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="src/pheromone.h" />
+		<Unit filename="src/protocol.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="src/protocol.h" />
+		<Unit filename="src/queue.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="src/queue.h" />
+		<Unit filename="src/rfid.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="src/rfid.h" />
+		<Unit filename="src/robot.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="src/robot.h" />
+		<Unit filename="src/scheduler.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="src/scheduler.h" />
+		<Unit filename="src/serialport.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="src/serialport.h" />
+		<Unit filename="src/task.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="src/task.h" />
+		<Unit filename="src/tasks/task_avoid.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="src/tasks/task_communicate.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="src/tasks/task_control.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="src/tasks/task_mission.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="src/tasks/task_navigate.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="src/tasks/task_refine.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="src/tasks/task_report.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="src/timelib.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="src/timelib.h" />
+		<Unit filename="src/udp.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="src/udp.h" />
+		<Extensions>
+			<code_completion />
+			<debugger />
+		</Extensions>
+	</Project>
+</CodeBlocks_project_file>

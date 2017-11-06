@@ -1,0 +1,16 @@
+# -- This file specifies room/area dimensions where robot is placed.
+
+# Define number of points
+5
+
+# Define points of the room/area (should be the same amount as specified)
+# Values must be in milimeters [mm]
+# Each point is defined in seperate line
+# Point is defined in this format - "x,y" (without quotation marks). For example, "0,0", next line "0,1000", etc.
+0,0
+6100,0
+6100,4120
+0,4120
+0,0
+
+# -- END
