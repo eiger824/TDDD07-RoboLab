@@ -152,5 +152,16 @@ void scheduler_run(scheduler_t *ces)
 		printf("Time difference (for task %d): %f\n", k, timelib_timer_diff(t0, t1));
 
 	}
+
+	/*
+	 * Refine + Avoid
+	 */
+	timelib_time_set(&t0);
+	scheduler_exec_task(ces, 4);
+	scheduler_exec_task(ces, 7);
+	timelib_time_set(&t1);
+	printf("Time difference (for task REFINE AND AVOID ): %f\n", timelib_timer_diff(t0, t1));
+
+
 }
 
