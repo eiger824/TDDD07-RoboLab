@@ -92,38 +92,38 @@ void scheduler_exec_task(scheduler_t *ces, int task_id)
 {
 	switch(task_id)
 	{
-	// Mission
-	case s_TASK_MISSION_ID :
-		task_mission();
-		break;
-	// Navigate
-	case s_TASK_NAVIGATE_ID :
-		task_navigate();
-		break;
-	// Control
-	case s_TASK_CONTROL_ID :
-		task_control();
-		break;
-	// Refine
-	case s_TASK_REFINE_ID :
-		task_refine();
-		break;
-	// Report
-	case s_TASK_REPORT_ID :
-		task_report();
-		break;
-	// Communicate
-	case s_TASK_COMMUNICATE_ID :
-		task_communicate();
-		break;
-	// Collision detection
-	case s_TASK_AVOID_ID :
-		task_avoid();
-		break;
-	// Other
-	default :
-		// Do nothing
-		break;
+		// Mission
+		case s_TASK_MISSION_ID :
+			task_mission();
+			break;
+			// Navigate
+		case s_TASK_NAVIGATE_ID :
+			task_navigate();
+			break;
+			// Control
+		case s_TASK_CONTROL_ID :
+			task_control();
+			break;
+			// Refine
+		case s_TASK_REFINE_ID :
+			task_refine();
+			break;
+			// Report
+		case s_TASK_REPORT_ID :
+			task_report();
+			break;
+			// Communicate
+		case s_TASK_COMMUNICATE_ID :
+			task_communicate();
+			break;
+			// Collision detection
+		case s_TASK_AVOID_ID :
+			task_avoid();
+			break;
+			// Other
+		default :
+			// Do nothing
+			break;
 	}
 }
 
@@ -141,10 +141,15 @@ void scheduler_run(scheduler_t *ces)
 
 	/* --- Write your code here --- */
 
-	struct timeval t0;
-	scheduler_exec_task(ces, s_TASK_AVOID_ID);
-	struct timeval t1;
-	printf("Time difference: %f\n", timelib_timer_diff(t0, t1));
+	for (unsigned k=1; k<8; ++)
+	{
 
+		struct timeval t0, t1;
+		timelib_timer_set(&t0);
+		scheduler_exec_task(ces, k);
+		timelib_timer_set(&t1);
+		printf("Time difference (for task %d): %f\n", k, timelib_timer_diff(t0, t1));
+
+	}
 }
 
