@@ -141,5 +141,10 @@ void scheduler_run(scheduler_t *ces)
 
 	/* --- Write your code here --- */
 
+	struct timeval t0;
+	scheduler_exec_task(ces, s_TASK_AVOID_ID);
+	struct timeval t1;
+	printf("Time difference: %f\n", timelib_timer_diff(t0, t1));
 
 }
+

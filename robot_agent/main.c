@@ -1,5 +1,4 @@
-/**
- * @file	main.c
+ /* @file	main.c
  * @author	Eriks Zaharans
  * @date	1 Jul 2013
  *
@@ -34,7 +33,8 @@ int main()
 	// Say hello!
 	printf("Hello world!\n");
 
-        /* Remove this line when you completed C.5
+//		 Remove this line when you completed C.5
+		 
 	// Initialization
 	// Load Configuration
 	config_load();
@@ -51,7 +51,7 @@ int main()
 	task_destroy();
 	// Deinit scheduler
 	scheduler_destroy(ces);
-        Remove this line when you completed C.5 */ 
+//        Remove this line when you completed C.5
 
 	// Say goodbye!
 	printf("Goodbye!\n");
