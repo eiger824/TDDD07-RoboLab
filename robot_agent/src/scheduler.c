@@ -20,8 +20,23 @@
 #include "timelib.h"
 
 /* -- Defines -- */
+#define		WCET_TASK_MISSION		
+#define		WCET_TASK_NAVIGATE		
+#define		WCET_TASK_CONTROL		
+#define		WCET_TASK_REFINE		
+#define		WCET_TASK_REPORT		
+#define		WCET_TASK_COMMUNICATE	
+#define		WCET_TASK_AVOID			
 
 /* -- Functions -- */
+
+/*
+ * Function: get_minor_cycle
+ * Description: calculates the minor cycle of the scheduler
+ * based on the calculated WCET's
+ */
+
+double get_minor_cycle();
 
 /**
  * Initialize cyclic executive scheduler
@@ -139,29 +154,30 @@ void scheduler_run(scheduler_t *ces)
 	/* --- Set minor cycle period --- */
 	//ces->minor = ...;
 
+	// Run start the time struct
+	timelib_timer_set(&ces->tv_started);
+	
 	/* --- Write your code here --- */
 
 	unsigned k;
+	struct timeval t0, t1;
 	for (k=1; k<8; ++k)
 	{
 
-		struct timeval t0, t1;
 		timelib_timer_set(&t0);
 		scheduler_exec_task(ces, k);
 		timelib_timer_set(&t1);
 		printf("Time difference (for task %d): %f\n", k, timelib_timer_diff(t0, t1));
-
 	}
 
 	/*
 	 * Refine + Avoid
 	 */
-	timelib_time_set(&t0);
+	timelib_timer_set(&t0);
 	scheduler_exec_task(ces, 4);
 	scheduler_exec_task(ces, 7);
-	timelib_time_set(&t1);
-	printf("Time difference (for task REFINE AND AVOID ): %f\n", timelib_timer_diff(t0, t1));
-
-
+	timelib_timer_set(&t1);
+	printf("Time difference (for task REFINE AND AVOID ): %f\n"
+			, timelib_timer_diff(t0, t1));
 }
 
