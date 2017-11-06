@@ -141,7 +141,8 @@ void scheduler_run(scheduler_t *ces)
 
 	/* --- Write your code here --- */
 
-	for (unsigned k=1; k<8; ++)
+	unsigned k;
+	for (k=1; k<8; ++k)
 	{
 
 		struct timeval t0, t1;

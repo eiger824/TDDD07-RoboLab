@@ -1,1 +1,4 @@
 *.swp
+bin/robot_agent
+obj
+
