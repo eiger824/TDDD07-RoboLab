@@ -19,25 +19,6 @@
 #include "task.h"
 #include "timelib.h"
 
-/* -- Defines -- */
-#define		WCET_TASK_MISSION		
-#define		WCET_TASK_NAVIGATE		
-#define		WCET_TASK_CONTROL		
-#define		WCET_TASK_REFINE		
-#define		WCET_TASK_REPORT		
-#define		WCET_TASK_COMMUNICATE	
-#define		WCET_TASK_AVOID			
-
-/* -- Functions -- */
-
-/*
- * Function: get_minor_cycle
- * Description: calculates the minor cycle of the scheduler
- * based on the calculated WCET's
- */
-
-double get_minor_cycle();
-
 /**
  * Initialize cyclic executive scheduler
  * @param minor Minor cycle in miliseconds (ms)
@@ -152,32 +133,39 @@ void scheduler_run(scheduler_t *ces)
 	/* --- Local variables (define variables here) --- */
 
 	/* --- Set minor cycle period --- */
-	//ces->minor = ...;
+    int major_cycle, nr_minor_cycles;
+    ces->minor = 100;
+
+    major_cycle = 1000;
+    nr_minor_cycles = major_cycle / ces->minor;
 
 	// Run start the time struct
-	timelib_timer_set(&ces->tv_started);
+// 	timelib_timer_set(&ces->tv_started);
+    scheduler_start(ces);
 	
-	/* --- Write your code here --- */
+    // Loop throught all minor cycles in a big major cycle
+    for (int i=0; i<nr_minor_cycles; ++i)
+    {
+        // Control task runs every 500
+        if (i % 5 == 0)
+        {
+            scheduler_exec_task(ces, s_TASK_CONTROL_ID);
+        }
+        scheduler_exec_task(ces, s_TASK_AVOID_ID);
+        scheduler_exec_task(ces, s_TASK_NAVIGATE_ID);
+        scheduler_exec_task(ces, s_TASK_REFINE_ID);
+        scheduler_exec_task(ces, s_TASK_REPORT_ID);
+        scheduler_exec_task(ces, s_TASK_MISSION_ID);
 
-	unsigned k;
-	struct timeval t0, t1;
-	for (k=1; k<8; ++k)
-	{
+        // Communicate task runs every 1000, at the first minor cycle
+        if (i == 0)
+        {
+            scheduler_exec_task(ces, s_TASK_COMMUNICATE_ID);
+        }
+        // Wait until the end of the current minor cycle
+        scheduler_wait_for_timer(ces);
+    }
 
-		timelib_timer_set(&t0);
-		scheduler_exec_task(ces, k);
-		timelib_timer_set(&t1);
-		printf("Time difference (for task %d): %f\n", k, timelib_timer_diff(t0, t1));
-	}
 
-	/*
-	 * Refine + Avoid
-	 */
-	timelib_timer_set(&t0);
-	scheduler_exec_task(ces, 4);
-	scheduler_exec_task(ces, 7);
-	timelib_timer_set(&t1);
-	printf("Time difference (for task REFINE AND AVOID ): %f\n"
-			, timelib_timer_diff(t0, t1));
 }
 
