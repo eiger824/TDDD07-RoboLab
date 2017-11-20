@@ -144,27 +144,31 @@ void scheduler_run(scheduler_t *ces)
     scheduler_start(ces);
 	
     // Loop throught all minor cycles in a big major cycle
-    for (int i=0; i<nr_minor_cycles; ++i)
-    {
-        // Control task runs every 500
-        if (i % 5 == 0)
-        {
-            scheduler_exec_task(ces, s_TASK_CONTROL_ID);
-        }
-        scheduler_exec_task(ces, s_TASK_AVOID_ID);
-        scheduler_exec_task(ces, s_TASK_NAVIGATE_ID);
-        scheduler_exec_task(ces, s_TASK_REFINE_ID);
-        scheduler_exec_task(ces, s_TASK_REPORT_ID);
-        scheduler_exec_task(ces, s_TASK_MISSION_ID);
+    int i;
+    while(1)
+      {
+	for (i=0; i<nr_minor_cycles; ++i)
+	  {
+	    // Control task runs every 500
+	    if (i % 5 == 0)
+	      {
+		scheduler_exec_task(ces, s_TASK_CONTROL_ID);
+	      }
+	    scheduler_exec_task(ces, s_TASK_AVOID_ID);
+	    scheduler_exec_task(ces, s_TASK_NAVIGATE_ID);
+	    scheduler_exec_task(ces, s_TASK_REFINE_ID);
+	    scheduler_exec_task(ces, s_TASK_REPORT_ID);
+	    scheduler_exec_task(ces, s_TASK_MISSION_ID);
 
-        // Communicate task runs every 1000, at the first minor cycle
-        if (i == 0)
-        {
-            scheduler_exec_task(ces, s_TASK_COMMUNICATE_ID);
-        }
-        // Wait until the end of the current minor cycle
-        scheduler_wait_for_timer(ces);
-    }
+	    // Communicate task runs every 1000, at the first minor cycle
+	    if (i == 0)
+	      {
+		scheduler_exec_task(ces, s_TASK_COMMUNICATE_ID);
+	      }
+	    // Wait until the end of the current minor cycle
+	    scheduler_wait_for_timer(ces);
+	  }
+      }
 
 
 }
