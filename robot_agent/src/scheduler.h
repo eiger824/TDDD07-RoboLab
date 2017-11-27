@@ -11,12 +11,6 @@
 #ifndef __SCHEDULER_H
 #define __SCHEDULER_H
 
-/* -- Includes -- */
-
-/* -- Enumurations -- */
-
-/* -- Types -- */
-
 /**
  * @brief Scheduler structure
  */
@@ -38,5 +32,6 @@ void scheduler_start(scheduler_t *ces); // Start scheduler
 void scheduler_wait_for_timer(scheduler_t *ces); // Wait (sleep) till end of minor cycle
 void scheduler_exec_task(scheduler_t *ces, int task_id); // Execute task
 void scheduler_run(scheduler_t *ces); // Run scheduler
+int  scheduler_get_deadline(int task_id); // Get deadline for specific task
 
 #endif /* __SCHEDULER_H */
