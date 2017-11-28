@@ -19,6 +19,9 @@
 #include "task.h"
 #include "timelib.h"
 
+// Nr tasks
+#define NR_TASKS_TO_HANDLE      7
+
 /*
  * Factor to use when calculating the deadlines, multiple of the WCET
  */
@@ -34,12 +37,17 @@
 #define wcet_TASK_COMMUNICATE   5
 #define wcet_TASK_AVOID         17
 
+typedef unsigned long long cnt_t;
+
 // Array holding the deadline overruns for every task
 // There are only 7 valid tasks, but there is a NOP
 // task defined in task.h, so let's just take the
 // advantage
-unsigned int deadline_overruns[8] = {0};
+unsigned int deadline_overruns[NR_TASKS_TO_HANDLE + 1] = {0};
 
+// A big array which counts the performed tasks over
+// the execution time of the program
+static cnt_t runtime_tasks[NR_TASKS_TO_HANDLE + 1] = {0};
 /**
  * Initialize cyclic executive scheduler
  * @param minor Minor cycle in miliseconds (ms)
@@ -176,37 +184,42 @@ void scheduler_run(scheduler_t *ces)
                 scheduler_exec_task(ces, s_TASK_CONTROL_ID);
                 if (timelib_timer_get(t0) > scheduler_get_deadline(s_TASK_CONTROL_ID))
                     ++deadline_overruns[s_TASK_CONTROL_ID];
+                ++runtime_tasks[s_TASK_CONTROL_ID];
             }
             // Avoid task
             timelib_timer_set(&t0);
             scheduler_exec_task(ces, s_TASK_AVOID_ID);
             if (timelib_timer_get(t0) > scheduler_get_deadline(s_TASK_AVOID_ID))
                 ++deadline_overruns[s_TASK_AVOID_ID];
+            ++runtime_tasks[s_TASK_AVOID_ID];
 
             // Navigate task
             timelib_timer_set(&t0);
             scheduler_exec_task(ces, s_TASK_NAVIGATE_ID);
             if (timelib_timer_get(t0) > scheduler_get_deadline(s_TASK_NAVIGATE_ID))
                 ++deadline_overruns[s_TASK_NAVIGATE_ID];
+            ++runtime_tasks[s_TASK_NAVIGATE_ID];
 
             // Refine task
             timelib_timer_set(&t0);
             scheduler_exec_task(ces, s_TASK_REFINE_ID);
             if (timelib_timer_get(t0) > scheduler_get_deadline(s_TASK_REFINE_ID))
                 ++deadline_overruns[s_TASK_REFINE_ID];
+            ++runtime_tasks[s_TASK_REFINE_ID];
 
             // Report task
             timelib_timer_set(&t0);
             scheduler_exec_task(ces, s_TASK_REPORT_ID);
             if (timelib_timer_get(t0) > scheduler_get_deadline(s_TASK_REPORT_ID))
                 ++deadline_overruns[s_TASK_REPORT_ID];
-
+            ++runtime_tasks[s_TASK_REPORT_ID];
 
             // Mission task
             timelib_timer_set(&t0);
             scheduler_exec_task(ces, s_TASK_MISSION_ID);
             if (timelib_timer_get(t0) > scheduler_get_deadline(s_TASK_MISSION_ID))
                 ++deadline_overruns[s_TASK_MISSION_ID];
+            ++runtime_tasks[s_TASK_MISSION_ID];
 
 
             // Communicate task runs every 1000, at the first minor cycle
@@ -217,6 +230,7 @@ void scheduler_run(scheduler_t *ces)
                 scheduler_exec_task(ces, s_TASK_COMMUNICATE_ID);
                 if (timelib_timer_get(t0) > scheduler_get_deadline(s_TASK_COMMUNICATE_ID))
                     ++deadline_overruns[s_TASK_COMMUNICATE_ID];
+                ++runtime_tasks[s_TASK_COMMUNICATE_ID];
 
             }
             // Wait until the end of the current minor cycle
@@ -278,4 +292,42 @@ int scheduler_get_deadline(int task_id)
             // Wrong
             return -1;
     }
+}
+
+cnt_t scheduler_get_all_task_cnt()
+{
+    cnt_t sum = 0;
+    unsigned i;
+    for (i=1; i<NR_TASKS_TO_HANDLE + 1; ++i)
+    {
+        sum += runtime_tasks[i];
+    }
+    return sum;
+}
+
+void scheduler_dump_statistics()
+{
+    // First: output the number of tasks that were run
+    printf("\n**************************************************************\n");
+    printf("Nr. of performed tasks:\t%llu\n\n", scheduler_get_all_task_cnt());
+    printf("DEADLINE OVERRUNS\n-------------------\n");
+    printf("\t\tmission\tnavigate\tcontrol\trefine\treport\tcommunicate\tavoid\n");
+    unsigned i;
+    for (i=1; i<NR_TASKS_TO_HANDLE + 1; ++i)
+    {
+        printf("#\t\t%u\t", deadline_overruns[i]);
+    }
+    printf("\n");
+    for (i=1; i<NR_TASKS_TO_HANDLE + 1; ++i)
+    {
+        printf("%%_self\t\t%.2f%%\t",
+                100 * ((float)deadline_overruns[i] / (float)runtime_tasks[i]));
+    }
+    printf("\n");
+    for (i=1; i<NR_TASKS_TO_HANDLE + 1; ++i)
+    {
+        printf("%%_self\t\t%.2f%%\t",
+                100 * ((float)deadline_overruns[i] / (float)scheduler_get_all_task_cnt()));
+    }
+    printf("\n**************************************************************\n");
 }

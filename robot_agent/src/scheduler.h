@@ -23,8 +23,6 @@ typedef struct s_SCHEDULER_STRUCT
 
 } scheduler_t;
 
-/* -- Constants -- */
-
 /* -- Function Prototypes -- */
 scheduler_t *scheduler_init(void); // Initialize cyclic executive scheduler
 void scheduler_destroy(scheduler_t *ces); // Deinitialize cyclic executive scheduler
@@ -33,5 +31,8 @@ void scheduler_wait_for_timer(scheduler_t *ces); // Wait (sleep) till end of min
 void scheduler_exec_task(scheduler_t *ces, int task_id); // Execute task
 void scheduler_run(scheduler_t *ces); // Run scheduler
 int  scheduler_get_deadline(int task_id); // Get deadline for specific task
+// Dump runtime statistics. No scheduler parameter is given since
+// this function shall be called from outside main routine
+void scheduler_dump_statistics();
 
 #endif /* __SCHEDULER_H */
