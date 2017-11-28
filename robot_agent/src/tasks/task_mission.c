@@ -10,6 +10,7 @@
 
 /* -- Includes -- */
 /* system libraries */
+#include <stdio.h>
 
 /* project libraries */
 #include "task.h"
@@ -32,6 +33,7 @@ void task_mission(void)
 
 		// -- Check go ahead timer --
 		go_ahead_time = (int)timelib_timer_get(g_task_mission_data.go_ahead_timer);
+
 		if(go_ahead_time > s_CONFIG_GO_AHEAD_TIME)
 		{
             g_go_ahead = 0;
@@ -105,6 +107,7 @@ void task_mission(void)
 					break;
 				// Stop tasks
 				case s_CMD_STOP :
+                    printf("-------> STOP COMMAND RECEIVED!!!\n");
 					g_task_mission.enabled 			= s_TRUE;
 					g_task_navigate.enabled 		= s_FALSE;
 					g_task_control.enabled 			= s_FALSE;

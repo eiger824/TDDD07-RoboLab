@@ -10,7 +10,6 @@
 
 /* -- Includes -- */
 /* system libraries */
-
 /* project libraries */
 #include "task.h"
 
@@ -43,6 +42,14 @@ void task_communicate(void)
 		//	LAB 2 starts here
 		// --------------------------------------------------
 
+
+         /* The order to follow when sending should be the following:
+          * 1) s_DATA_STRUCT_TYPE_VICTIM  critical
+          * 2) s_DATA_STRUCT_TYPE_ROBOT important  
+          * 3) s_DATA_STRUCT_TYPE_PHEROMONE important
+          * 4) s_DATA_STRUCT_TYPE_STREAM: not critical
+          */
+        doublylinkedlist_sort_by_critical(g_list_send);
 
 		/* --- Send Data --- */
 		while(g_list_send->count != 0)
@@ -192,4 +199,17 @@ void task_communicate(void)
 		// Increase msg sequance id
 		g_message_sequence_id++;
 	}
+}
+
+void doublylinkedlist_sort_by_critical(doublylinkedlist_t *dlls)
+{
+    unsigned i,j;
+    for (i=0; i<dlls->count; ++i)    
+    {
+        for (j=i; j<dlls->count; ++j)
+        {
+            if
+        }
+        if 
+    }
 }

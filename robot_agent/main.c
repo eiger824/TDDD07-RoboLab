@@ -7,7 +7,6 @@
  * Application main file.
  */
 
-
 /* -- Includes -- */
 /* system libraries */
 #include <stdio.h>
@@ -84,7 +83,7 @@ int sig_handler(int signo)
         fprintf(stderr, "SIGINT received!\n");
         scheduler_dump_statistics();
 
-        printf("Goodbye from signal signal handler!\n");
+        printf("Goodbye from signal handler!\n");
         // Exit our program
         exit(1);
     }

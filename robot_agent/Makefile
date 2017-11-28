@@ -12,7 +12,7 @@ LD = g++
 WINDRES = windres
 
 INC = -Isrc/tasks -Isrc/ -I.
-CFLAGS = -Wall -Wextra -Wpedantic -Ds_CONFIG_DEBUG_ENABLE
+CFLAGS = -Wall -Wextra -Wpedantic 
 RESINC = 
 LIBDIR = 
 LIB = 

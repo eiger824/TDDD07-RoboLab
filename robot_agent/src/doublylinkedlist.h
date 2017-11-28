@@ -59,4 +59,6 @@ void doublylinkedlist_delete(doublylinkedlist_t *dlls, doublylinkedlist_node_t *
 
 void doublylinkedlist_empty(doublylinkedlist_t *dlls); // Empty the doubly linked list
 
+void doublylinkedlist_sort_by_critical(doublylinkedlist_t *dlls); // Given a list, sort its nodes by critical value
+
 #endif /* __DOUBLYLINKEDLIST_H */
