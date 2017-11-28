@@ -1,4 +1,4 @@
 *.swp
-bin/robot_agent
+robot_agent/bin/robot_agent
 obj
 
