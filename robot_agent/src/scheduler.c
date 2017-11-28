@@ -14,6 +14,7 @@
 #include <stdlib.h>
 #include <sys/time.h>
 #include <unistd.h>
+#include <math.h>
 /* project libraries */
 #include "scheduler.h"
 #include "task.h"
@@ -25,13 +26,13 @@
 /*
  * Factor to use when calculating the deadlines, multiple of the WCET
  */
-#define HIGH_PRIO_FACTOR        1
-#define LOW_PRIO_FACTOR         2
+#define HIGH_PRIO_FACTOR        1.5
+#define LOW_PRIO_FACTOR         2.0
 
 // Obtained WCETs from our measurements
 #define wcet_TASK_MISSION       1
 #define wcet_TASK_NAVIGATE      1
-#define wcet_TASK_CONTROL       2
+#define wcet_TASK_CONTROL       3
 #define wcet_TASK_REFINE        11
 #define wcet_TASK_REPORT        1
 #define wcet_TASK_COMMUNICATE   5
@@ -266,25 +267,25 @@ int scheduler_get_deadline(int task_id)
     {
         // Mission
         case s_TASK_MISSION_ID :
-            return wcet_TASK_MISSION * LOW_PRIO_FACTOR;
+            return roundf((float)wcet_TASK_MISSION * (float)LOW_PRIO_FACTOR * 10 ) / 10;
             // Navigate
         case s_TASK_NAVIGATE_ID :
-            return wcet_TASK_NAVIGATE * LOW_PRIO_FACTOR;
+            return roundf((float)wcet_TASK_NAVIGATE * (float)LOW_PRIO_FACTOR * 10 ) / 10;
             // Control
         case s_TASK_CONTROL_ID :
-            return wcet_TASK_CONTROL * HIGH_PRIO_FACTOR;
+            return roundf((float)wcet_TASK_CONTROL * (float)HIGH_PRIO_FACTOR * 10 ) / 10;
             // Refine
         case s_TASK_REFINE_ID :
-            return wcet_TASK_REFINE * LOW_PRIO_FACTOR;
+            return roundf((float)wcet_TASK_REFINE * (float)LOW_PRIO_FACTOR * 10 ) / 10;
             // Report
         case s_TASK_REPORT_ID :
-            return wcet_TASK_REPORT * LOW_PRIO_FACTOR;
+            return roundf((float)wcet_TASK_REPORT* (float)LOW_PRIO_FACTOR * 10 ) / 10;
             // Communicate
         case s_TASK_COMMUNICATE_ID :
-            return wcet_TASK_COMMUNICATE * HIGH_PRIO_FACTOR;
+            return roundf((float)wcet_TASK_COMMUNICATE* (float)HIGH_PRIO_FACTOR * 10 ) / 10;
             // Collision detection
         case s_TASK_AVOID_ID :
-            return wcet_TASK_AVOID * LOW_PRIO_FACTOR;
+            return roundf((float)wcet_TASK_AVOID* (float)LOW_PRIO_FACTOR * 10 ) / 10;
             // Other
         default :
             // Wrong
@@ -334,12 +335,12 @@ void scheduler_dump_statistics()
     printf("#_runs\t");
     for (i=1; i<NR_TASKS_TO_HANDLE + 1; ++i)
     {
-        printf("%llu\t", runtime_tasks[i]);
+        printf("%llu\t\t", runtime_tasks[i]);
     }
     printf("\n#_do\t");
     for (i=1; i<NR_TASKS_TO_HANDLE + 1; ++i)
     {
-        printf("%llu\t", deadline_overruns[i]);
+        printf("%llu\t\t", deadline_overruns[i]);
     }
     printf("\n%%_self\t");
     for (i=1; i<NR_TASKS_TO_HANDLE + 1; ++i)

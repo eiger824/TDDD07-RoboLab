@@ -34,7 +34,7 @@ void task_mission(void)
 		go_ahead_time = (int)timelib_timer_get(g_task_mission_data.go_ahead_timer);
 		if(go_ahead_time > s_CONFIG_GO_AHEAD_TIME)
 		{
-			//g_go_ahead = 0;
+            g_go_ahead = 0;
 		}
 
 		// -- Process all data in the queue --
