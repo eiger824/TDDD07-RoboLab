@@ -37,17 +37,15 @@
 #define wcet_TASK_COMMUNICATE   5
 #define wcet_TASK_AVOID         17
 
-typedef unsigned long long cnt_t;
-
 // Array holding the deadline overruns for every task
 // There are only 7 valid tasks, but there is a NOP
 // task defined in task.h, so let's just take the
-// advantage
-unsigned int deadline_overruns[NR_TASKS_TO_HANDLE + 1] = {0};
+// advantage for compatibility purposes
+static cnt_t deadline_overruns[NR_TASKS_TO_HANDLE + 1]  = {0};
 
 // A big array which counts the performed tasks over
 // the execution time of the program
-static cnt_t runtime_tasks[NR_TASKS_TO_HANDLE + 1] = {0};
+static cnt_t runtime_tasks[NR_TASKS_TO_HANDLE + 1]      = {0};
 /**
  * Initialize cyclic executive scheduler
  * @param minor Minor cycle in miliseconds (ms)
@@ -305,29 +303,59 @@ cnt_t scheduler_get_all_task_cnt()
     return sum;
 }
 
-void scheduler_dump_statistics()
+cnt_t scheduler_get_all_deadline_overruns()
 {
-    // First: output the number of tasks that were run
-    printf("\n**************************************************************\n");
-    printf("Nr. of performed tasks:\t%llu\n\n", scheduler_get_all_task_cnt());
-    printf("DEADLINE OVERRUNS\n-------------------\n");
-    printf("\t\tmission\tnavigate\tcontrol\trefine\treport\tcommunicate\tavoid\n");
+    cnt_t sum = 0;
     unsigned i;
     for (i=1; i<NR_TASKS_TO_HANDLE + 1; ++i)
     {
-        printf("#\t\t%u\t", deadline_overruns[i]);
+        sum += deadline_overruns[i];
     }
-    printf("\n");
+    return sum;
+}
+
+void scheduler_dump_statistics()
+{
+    // First: output the number of tasks that were run
+    printf("\n****************************************************************\n");
+    printf("Nr. of performed tasks:\t\t%llu\n", scheduler_get_all_task_cnt());
+    printf("Nr. of detected overruns:\t%llu\n\n", scheduler_get_all_deadline_overruns());
+    printf("Summary of parameters:\n");
+    printf("#_runs:\tNumber of times a given task has run\n");
+    printf("#_do:\tNumber of deadline overruns a given task has experienced\n");
+    printf("%%_self:\tPercentage of overruns with respect to the number of\n");
+    printf("\ttimes that task ran\n");
+    printf("%%_all:\tPercentage of overruns with respect to the global number\n");
+    printf("\tof overruns\n\n");
+    printf("SUMMARY\n-------------------\n");
+    printf("\tMISS\t\tNAV\t\tCON\t\tREF\t\tREP\t\tCOM\t\tAVO\n");
+    printf("\t----\t\t---\t\t---\t\t---\t\t---\t\t---\t\t---\n");
+    unsigned i;
+    printf("#_runs\t");
     for (i=1; i<NR_TASKS_TO_HANDLE + 1; ++i)
     {
-        printf("%%_self\t\t%.2f%%\t",
+        printf("%llu\t", runtime_tasks[i]);
+    }
+    printf("\n#_do\t");
+    for (i=1; i<NR_TASKS_TO_HANDLE + 1; ++i)
+    {
+        printf("%llu\t", deadline_overruns[i]);
+    }
+    printf("\n%%_self\t");
+    for (i=1; i<NR_TASKS_TO_HANDLE + 1; ++i)
+    {
+        printf("%.2f%%\t\t",
                 100 * ((float)deadline_overruns[i] / (float)runtime_tasks[i]));
     }
-    printf("\n");
+    printf("\n%%_all\t");
     for (i=1; i<NR_TASKS_TO_HANDLE + 1; ++i)
     {
-        printf("%%_self\t\t%.2f%%\t",
-                100 * ((float)deadline_overruns[i] / (float)scheduler_get_all_task_cnt()));
+        printf("%.2f%%\t\t",
+                100 * ((float)deadline_overruns[i] / (float)scheduler_get_all_deadline_overruns()));
     }
-    printf("\n**************************************************************\n");
+    printf("\n\nOVERALL PERFORMANCE OF SCHEDULER:\t%.2f%%\n",
+            100 * ( 1 - ((float)scheduler_get_all_deadline_overruns() / (float)scheduler_get_all_task_cnt())));
+    printf("OVERALL DEADLINE OVERRUNS OF SCHEDULER:\t%.2f%%\n",
+            100 * (  ((float)scheduler_get_all_deadline_overruns() / (float)scheduler_get_all_task_cnt())));
+    printf("****************************************************************\n");
 }

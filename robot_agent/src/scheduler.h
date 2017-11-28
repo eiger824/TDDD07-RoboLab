@@ -23,6 +23,7 @@ typedef struct s_SCHEDULER_STRUCT
 
 } scheduler_t;
 
+typedef unsigned long long cnt_t;
 /* -- Function Prototypes -- */
 scheduler_t *scheduler_init(void); // Initialize cyclic executive scheduler
 void scheduler_destroy(scheduler_t *ces); // Deinitialize cyclic executive scheduler
@@ -34,5 +35,10 @@ int  scheduler_get_deadline(int task_id); // Get deadline for specific task
 // Dump runtime statistics. No scheduler parameter is given since
 // this function shall be called from outside main routine
 void scheduler_dump_statistics();
+
+// Get the overall task count
+cnt_t scheduler_get_all_task_cnt();
+// Get the overall deadline overrun count
+cnt_t scheduler_get_all_deadline_overruns();
 
 #endif /* __SCHEDULER_H */
