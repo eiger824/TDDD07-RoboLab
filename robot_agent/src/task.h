@@ -16,6 +16,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <sys/time.h>
 #include <time.h>
 /* project libraries */
 #include "config.h"
@@ -34,9 +35,10 @@
 #include "doublylinkedlist.h"
 #include "debug.h"
 
-/* -- Enumurations -- */
+/* -- Enumerations -- */
 
-/* -- Types -- */
+/* Time between victim found and message sent */
+struct timeval notify_victim_time;
 
 /**
  * @brief Task structure

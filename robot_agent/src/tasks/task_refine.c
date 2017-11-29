@@ -10,7 +10,7 @@
 
 /* -- Includes -- */
 /* system libraries */
-
+#include <stdio.h>
 /* project libraries */
 #include "task.h"
 
@@ -45,6 +45,9 @@ void task_refine(void)
 		// If s_ENVIROMENT_TAG_UNKNOWN, tag is unknown. Most probably a victim
 		else if(res == s_ENVIROMENT_TAG_UNKNOWN)
 		{
+            // Victim found: start timer
+            printf("[Req.2] Victim was found!\n");
+            gettimeofday(&notify_victim_time, NULL);
 			// Redirect to task_report()
 			// Copy ID to pipe
 			strncpy(g_tp_refine_report.victim_id, g_rfids->id, 11);
