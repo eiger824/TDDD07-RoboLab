@@ -38,8 +38,6 @@
 #define wcet_TASK_COMMUNICATE   5
 #define wcet_TASK_AVOID         17
 
-int never_printed_before = 1;
-
 // Array holding the deadline overruns for every task
 // There are only 7 valid tasks, but there is a NOP
 // task defined in task.h, so let's just take the
@@ -49,6 +47,9 @@ static cnt_t deadline_overruns[NR_TASKS_TO_HANDLE + 1]  = {0};
 // A big array which counts the performed tasks over
 // the execution time of the program
 static cnt_t runtime_tasks[NR_TASKS_TO_HANDLE + 1]      = {0};
+
+// global constant representing the average period for the avoid task
+static float runtime_average_avoid_task = 0.0;
 /**
  * Initialize cyclic executive scheduler
  * @param minor Minor cycle in miliseconds (ms)
@@ -160,13 +161,20 @@ void scheduler_exec_task(scheduler_t *ces, int task_id)
  */
 void scheduler_run(scheduler_t *ces)
 {
-    /* --- Local variables (define variables here) --- */
-    struct timeval t0;
-    struct timeval t1_stop;
-    t1_stop.tv_sec = 0;
-    t1_stop.tv_usec = 0;
+    // Local variables (define variables here)
+    struct timeval task_exec_time;
+    struct timeval avoid_period;
+
+    // Scheduler details
+    int major_cycle;
+    int nr_minor_cycles;
+
+    // Runtime sample of avoid task period
+    float current_sample_avoid_task = 0.0;
+    int first_time = 1;
+    int second_time = 1;
+
     /* --- Set minor cycle period --- */
-    int major_cycle, nr_minor_cycles;
     ces->minor = 100;
 
     major_cycle = 1000;
@@ -174,6 +182,9 @@ void scheduler_run(scheduler_t *ces)
 
     // Run start the time struct
     scheduler_start(ces);
+
+    // Start avoid period task timer
+//     timelib_timer_set(&avoid_period);
 
     // Loop through all minor cycles in a big major cycle
     int i;
@@ -184,55 +195,66 @@ void scheduler_run(scheduler_t *ces)
             // Control task runs every 500
             if (i % 5 == 0)
             {
-                timelib_timer_set(&t0);
+                timelib_timer_set(&task_exec_time);
                 scheduler_exec_task(ces, s_TASK_CONTROL_ID);
-                if (timelib_timer_get(t0) > scheduler_get_deadline(s_TASK_CONTROL_ID))
+                if (timelib_timer_get(task_exec_time) > scheduler_get_deadline(s_TASK_CONTROL_ID))
                     ++deadline_overruns[s_TASK_CONTROL_ID];
                 ++runtime_tasks[s_TASK_CONTROL_ID];
-
-                if (g_task_control.enabled == s_FALSE && (t1_stop.tv_sec != 0 && t1_stop.tv_usec != 0))
-                {
-                    if (never_printed_before)
-                    {
-                        printf("Elapsed milliseconds between STOP CMD and motors stopped: %f\n",
-                            timelib_timer_get(t1_stop));
-                        never_printed_before = 0;
-                    }
-                    
-                }
             }
             // Avoid task
-            timelib_timer_set(&t0);
+            if (first_time)
+            {
+                // The first time, just set the timer
+                timelib_timer_set(&avoid_period);
+                first_time = 0;
+            }
+            else
+            {
+                // After the first time, always get the elapsed time
+                current_sample_avoid_task = timelib_timer_reset(&avoid_period);
+                if (second_time)
+                {
+                    // The second time, compute elapsed time AND set average to first sample
+                    runtime_average_avoid_task = current_sample_avoid_task;
+                    second_time = 0;
+                }
+                else
+                {
+                    // Update runtime average of avoid task
+                    runtime_average_avoid_task = (runtime_average_avoid_task + current_sample_avoid_task) / 2;
+                }
+            }
+            timelib_timer_set(&task_exec_time);
             scheduler_exec_task(ces, s_TASK_AVOID_ID);
-            if (timelib_timer_get(t0) > scheduler_get_deadline(s_TASK_AVOID_ID))
+            if (timelib_timer_get(task_exec_time) > scheduler_get_deadline(s_TASK_AVOID_ID))
                 ++deadline_overruns[s_TASK_AVOID_ID];
             ++runtime_tasks[s_TASK_AVOID_ID];
 
             // Navigate task
-            timelib_timer_set(&t0);
+            timelib_timer_set(&task_exec_time);
             scheduler_exec_task(ces, s_TASK_NAVIGATE_ID);
-            if (timelib_timer_get(t0) > scheduler_get_deadline(s_TASK_NAVIGATE_ID))
+            if (timelib_timer_get(task_exec_time) > scheduler_get_deadline(s_TASK_NAVIGATE_ID))
                 ++deadline_overruns[s_TASK_NAVIGATE_ID];
             ++runtime_tasks[s_TASK_NAVIGATE_ID];
 
             // Refine task
-            timelib_timer_set(&t0);
+            timelib_timer_set(&task_exec_time);
             scheduler_exec_task(ces, s_TASK_REFINE_ID);
-            if (timelib_timer_get(t0) > scheduler_get_deadline(s_TASK_REFINE_ID))
+            if (timelib_timer_get(task_exec_time) > scheduler_get_deadline(s_TASK_REFINE_ID))
                 ++deadline_overruns[s_TASK_REFINE_ID];
             ++runtime_tasks[s_TASK_REFINE_ID];
 
             // Report task
-            timelib_timer_set(&t0);
+            timelib_timer_set(&task_exec_time);
             scheduler_exec_task(ces, s_TASK_REPORT_ID);
-            if (timelib_timer_get(t0) > scheduler_get_deadline(s_TASK_REPORT_ID))
+            if (timelib_timer_get(task_exec_time) > scheduler_get_deadline(s_TASK_REPORT_ID))
                 ++deadline_overruns[s_TASK_REPORT_ID];
             ++runtime_tasks[s_TASK_REPORT_ID];
 
             // Mission task
-            timelib_timer_set(&t0);
+            timelib_timer_set(&task_exec_time);
             scheduler_exec_task(ces, s_TASK_MISSION_ID);
-            if (timelib_timer_get(t0) > scheduler_get_deadline(s_TASK_MISSION_ID))
+            if (timelib_timer_get(task_exec_time) > scheduler_get_deadline(s_TASK_MISSION_ID))
                 ++deadline_overruns[s_TASK_MISSION_ID];
             ++runtime_tasks[s_TASK_MISSION_ID];
 
@@ -241,16 +263,11 @@ void scheduler_run(scheduler_t *ces)
             if (i == 0)
             {
                 // Communicate task
-                timelib_timer_set(&t0);
+                timelib_timer_set(&task_exec_time);
                 scheduler_exec_task(ces, s_TASK_COMMUNICATE_ID);
-                if (timelib_timer_get(t0) > scheduler_get_deadline(s_TASK_COMMUNICATE_ID))
+                if (timelib_timer_get(task_exec_time) > scheduler_get_deadline(s_TASK_COMMUNICATE_ID))
                     ++deadline_overruns[s_TASK_COMMUNICATE_ID];
                 ++runtime_tasks[s_TASK_COMMUNICATE_ID];
-
-                if (g_task_control.enabled == s_FALSE)
-                {
-                    timelib_timer_set(&t1_stop);
-                }
             }
             // Wait until the end of the current minor cycle
             scheduler_wait_for_timer(ces);
@@ -341,6 +358,8 @@ void scheduler_dump_statistics()
     printf("\n****************************************************************\n");
     printf("Nr. of performed tasks:\t\t%llu\n", scheduler_get_all_task_cnt());
     printf("Nr. of detected overruns:\t%llu\n\n", scheduler_get_all_deadline_overruns());
+    printf("Application requirements:\n");
+    printf("Avoid task call rate: %f ms\n\n", runtime_average_avoid_task);
     printf("Summary of parameters:\n");
     printf("#_runs:\tNumber of times a given task has run\n");
     printf("#_do:\tNumber of deadline overruns a given task has experienced\n");

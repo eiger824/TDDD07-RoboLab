@@ -14,7 +14,6 @@
 /* project libraries */
 #include "task.h"
 
-static int never_printed_before = 1;
  /**
  * Sense, control, localization
  */
@@ -101,12 +100,4 @@ void task_control(void)
 			g_tp_navigate_control.event = s_TASK_EVENT_RESET;
 		}
 	}
-    else
-    {
-        if (never_printed_before)
-        {
-            printf("MOTORS STOPPED!!\n");
-            never_printed_before = 0;
-        }
-    }
 }

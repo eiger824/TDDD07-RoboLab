@@ -11,9 +11,13 @@
 /* -- Includes -- */
 /* system libraries */
 #include <stdio.h>
+#include <sys/time.h>
 
 /* project libraries */
 #include "task.h"
+
+// Time structure to measure time between stop cmd and stop motors
+static struct timeval t0;
 
 /**
  * Control mission
@@ -94,6 +98,7 @@ void task_mission(void)
 				{
 				// Start tasks
 				case s_CMD_START :
+                    printf("Start command received\n");
 					g_task_mission.enabled 			= s_TRUE;
 					g_task_navigate.enabled 		= s_TRUE;
 					g_task_control.enabled 			= s_TRUE;
@@ -107,7 +112,9 @@ void task_mission(void)
 					break;
 				// Stop tasks
 				case s_CMD_STOP :
-                    printf("-------> STOP COMMAND RECEIVED!!!\n");
+                    printf("Stop command received\n");
+                    timelib_timer_set(&t0);
+
 					g_task_mission.enabled 			= s_TRUE;
 					g_task_navigate.enabled 		= s_FALSE;
 					g_task_control.enabled 			= s_FALSE;
@@ -120,6 +127,7 @@ void task_mission(void)
 
 					// Get full control over robot
 					openinterface_drive(g_ois, 0, 0x8000);
+                    printf("Motors stopped after %f milliseconds\n", timelib_timer_get(t0));
 					break;
 				case s_CMD_GO_AHEAD :
 					// Go Ahead received
