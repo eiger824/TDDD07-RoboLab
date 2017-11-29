@@ -49,7 +49,7 @@ void task_communicate(void)
           * 3) s_DATA_STRUCT_TYPE_PHEROMONE important
           * 4) s_DATA_STRUCT_TYPE_STREAM: not critical
           */
-        doublylinkedlist_sort_by_critical(g_list_send);
+        g_list_send = doublylinkedlist_sort_by_critical(g_list_send);
 
 		/* --- Send Data --- */
 		while(g_list_send->count != 0)
@@ -201,15 +201,3 @@ void task_communicate(void)
 	}
 }
 
-void doublylinkedlist_sort_by_critical(doublylinkedlist_t *dlls)
-{
-    unsigned i,j;
-    for (i=0; i<dlls->count; ++i)    
-    {
-        for (j=i; j<dlls->count; ++j)
-        {
-            if
-        }
-        if 
-    }
-}
