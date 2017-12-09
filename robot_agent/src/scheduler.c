@@ -50,6 +50,9 @@ static cnt_t runtime_tasks[NR_TASKS_TO_HANDLE + 1]      = {0};
 
 // global constant representing the average period for the avoid task
 static float runtime_average_avoid_task = 0.0;
+// global constant representing the average waiting time every minor cycle
+// when all tasks have completed (i.e. IDLE time)
+static float runtime_average_sleep_time = 0.0;
 /**
  * Initialize cyclic executive scheduler
  * @param minor Minor cycle in miliseconds (ms)
@@ -164,6 +167,7 @@ void scheduler_run(scheduler_t *ces)
     // Local variables (define variables here)
     struct timeval task_exec_time;
     struct timeval avoid_period;
+    struct timeval remaining_time;
 
     // Scheduler details
     int major_cycle;
@@ -171,8 +175,13 @@ void scheduler_run(scheduler_t *ces)
 
     // Runtime sample of avoid task period
     float current_sample_avoid_task = 0.0;
+    // Runtime IDLE time every minor cycle
+    float current_measurement = 0.0;
+
     int first_time = 1;
     int second_time = 1;
+
+    int first_measurement = 1;
 
     /* --- Set minor cycle period --- */
     ces->minor = 100;
@@ -230,6 +239,7 @@ void scheduler_run(scheduler_t *ces)
                     runtime_average_avoid_task = (runtime_average_avoid_task + current_sample_avoid_task) / 2;
                 }
             }
+
             timelib_timer_set(&task_exec_time);
             scheduler_exec_task(ces, s_TASK_AVOID_ID);
             if (timelib_timer_get(task_exec_time) > scheduler_get_deadline(s_TASK_AVOID_ID))
@@ -279,7 +289,19 @@ void scheduler_run(scheduler_t *ces)
                 ++runtime_tasks[s_TASK_COMMUNICATE_ID];
             }
             // Wait until the end of the current minor cycle
+            timelib_timer_set(&remaining_time);
             scheduler_wait_for_timer(ces);
+            current_measurement = timelib_timer_get(remaining_time);
+
+            if (first_measurement)
+            {
+                runtime_average_sleep_time = current_measurement;
+                first_measurement = 0;
+            }
+            else
+            {
+                runtime_average_sleep_time = (current_measurement + runtime_average_sleep_time) / 2;
+            }
         }
     }
 
@@ -368,7 +390,8 @@ void scheduler_dump_statistics()
     printf("Nr. of performed tasks:\t\t%llu\n", scheduler_get_all_task_cnt());
     printf("Nr. of detected overruns:\t%llu\n\n", scheduler_get_all_deadline_overruns());
     printf("Application requirements:\n");
-    printf("Avoid task call rate: %f ms\n\n", runtime_average_avoid_task);
+    printf("Avoid task call rate: %f ms\n", runtime_average_avoid_task);
+    printf("Average IDLE time every minor cycle: %f ms\n\n", runtime_average_sleep_time);
     printf("Summary of parameters:\n");
     printf("#_runs:\tNumber of times a given task has run\n");
     printf("#_do:\tNumber of deadline overruns a given task has experienced\n");
