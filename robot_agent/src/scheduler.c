@@ -328,26 +328,26 @@ int scheduler_get_deadline(int task_id)
     switch (task_id)
     {
         // Mission
-        case s_TASK_MISSION_ID :
-            return roundf((float)wcet_TASK_MISSION * (float)LOW_PRIO_FACTOR * 10 ) / 10;
+        case 1 :
+            return ceil((float)1* (float)2.0);
             // Navigate
-        case s_TASK_NAVIGATE_ID :
-            return roundf((float)wcet_TASK_NAVIGATE * (float)LOW_PRIO_FACTOR * 10 ) / 10;
+        case 2:
+            return ceil((float)1* (float)2.0);
             // Control
-        case s_TASK_CONTROL_ID :
-            return roundf((float)wcet_TASK_CONTROL * (float)HIGH_PRIO_FACTOR * 10 ) / 10;
+        case 3:
+            return ceil((float)5* (float)1.5);
             // Refine
-        case s_TASK_REFINE_ID :
-            return roundf((float)wcet_TASK_REFINE * (float)LOW_PRIO_FACTOR * 10 ) / 10;
+        case 4:
+            return ceil((float)11* (float)2.0);
             // Report
-        case s_TASK_REPORT_ID :
-            return roundf((float)wcet_TASK_REPORT* (float)LOW_PRIO_FACTOR * 10 ) / 10;
+        case 5:
+            return ceil((float)1* (float)2.0);
             // Communicate
-        case s_TASK_COMMUNICATE_ID :
-            return roundf((float)wcet_TASK_COMMUNICATE* (float)HIGH_PRIO_FACTOR * 10 ) / 10;
+        case 6:
+            return ceil((float)5* (float)1.5);
             // Collision detection
-        case s_TASK_AVOID_ID :
-            return roundf((float)wcet_TASK_AVOID* (float)LOW_PRIO_FACTOR * 10 ) / 10;
+        case 7:
+            return ceil((float)17* (float)2.0);
             // Other
         default :
             // Wrong

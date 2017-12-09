@@ -46,8 +46,8 @@ void task_communicate(void)
 
 
         /* The order to follow when sending should be the following:
-         * 1) s_DATA_STRUCT_TYPE_VICTIM  critical
-         * 2) s_DATA_STRUCT_TYPE_ROBOT important  
+         * 1) s_DATA_STRUCT_TYPE_ROBOT critical
+         * 2) s_DATA_STRUCT_TYPE_VICTIM important
          * 3) s_DATA_STRUCT_TYPE_PHEROMONE important
          * 4) s_DATA_STRUCT_TYPE_STREAM: not critical
          */
@@ -144,7 +144,7 @@ void task_communicate(void)
                         //Massi: go_ahead packet
                     case s_PROTOCOL_TYPE_GO_AHEAD :
                         {
-                            // Declare go ahead command 
+                            // Declare go ahead command
                             command_t go_ahead;
                             go_ahead.cmd = s_CMD_GO_AHEAD;
                             // Redirect to mission by adding it to the queue
