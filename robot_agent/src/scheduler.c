@@ -32,7 +32,7 @@
 // Obtained WCETs from our measurements
 #define wcet_TASK_MISSION       1
 #define wcet_TASK_NAVIGATE      1
-#define wcet_TASK_CONTROL       3
+#define wcet_TASK_CONTROL       5
 #define wcet_TASK_REFINE        11
 #define wcet_TASK_REPORT        1
 #define wcet_TASK_COMMUNICATE   5
@@ -193,6 +193,8 @@ void scheduler_run(scheduler_t *ces)
         for (i=0; i<nr_minor_cycles; ++i)
         {
             // Control task runs every 500
+            // But when this task does NOT run (i.e. in minor cycles 1,2,3,4,6,7,8,9),
+            // we want to keep this slot free so the rest of the tasks' periods are respected
             if (i % 5 == 0)
             {
                 timelib_timer_set(&task_exec_time);
@@ -200,6 +202,10 @@ void scheduler_run(scheduler_t *ces)
                 if (timelib_timer_get(task_exec_time) > scheduler_get_deadline(s_TASK_CONTROL_ID))
                     ++deadline_overruns[s_TASK_CONTROL_ID];
                 ++runtime_tasks[s_TASK_CONTROL_ID];
+            }
+            else
+            {
+                usleep(wcet_TASK_CONTROL);
             }
             // Avoid task
             if (first_time)
@@ -260,6 +266,9 @@ void scheduler_run(scheduler_t *ces)
 
 
             // Communicate task runs every 1000, at the first minor cycle
+            // In this case, we don't need to sleep or wait as we do for the control task
+            // since this task executes at the end of every minor cycle so the other tasks
+            // won't be affected
             if (i == 0)
             {
                 // Communicate task
