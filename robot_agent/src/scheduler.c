@@ -53,6 +53,11 @@ static float runtime_average_avoid_task = 0.0;
 // global constant representing the average waiting time every minor cycle
 // when all tasks have completed (i.e. IDLE time)
 static float runtime_average_sleep_time = 0.0;
+// Counter with the number of times the communication task tries to run
+// without having received a go_ahead
+static cnt_t illegal_communications = 0;
+// Counter with the total number of times the communication task runs
+static cnt_t total_communications = 0;
 /**
  * Initialize cyclic executive scheduler
  * @param minor Minor cycle in miliseconds (ms)
@@ -281,13 +286,23 @@ void scheduler_run(scheduler_t *ces)
             // won't be affected
             if (i == 0)
             {
-                // Communicate task
-                timelib_timer_set(&task_exec_time);
-                scheduler_exec_task(ces, s_TASK_COMMUNICATE_ID);
-                if (timelib_timer_get(task_exec_time) > scheduler_get_deadline(s_TASK_COMMUNICATE_ID))
-                    ++deadline_overruns[s_TASK_COMMUNICATE_ID];
-                ++runtime_tasks[s_TASK_COMMUNICATE_ID];
+                // Last check, if go ahead was received
+                if (g_go_ahead)
+                {
+                    // Communicate task
+                    timelib_timer_set(&task_exec_time);
+                    scheduler_exec_task(ces, s_TASK_COMMUNICATE_ID);
+                    if (timelib_timer_get(task_exec_time) > scheduler_get_deadline(s_TASK_COMMUNICATE_ID))
+                        ++deadline_overruns[s_TASK_COMMUNICATE_ID];
+                    ++runtime_tasks[s_TASK_COMMUNICATE_ID];
+                }
+                else
+                {
+                    ++illegal_communications;
+                }
+                ++total_communications;
             }
+
             // Wait until the end of the current minor cycle
             timelib_timer_set(&remaining_time);
             scheduler_wait_for_timer(ces);
@@ -390,7 +405,15 @@ void scheduler_dump_statistics()
     printf("Nr. of performed tasks:\t\t%llu\n", scheduler_get_all_task_cnt());
     printf("Nr. of detected overruns:\t%llu\n\n", scheduler_get_all_deadline_overruns());
     printf("Application requirements:\n");
-    printf("Avoid task call rate: %f ms\n", runtime_average_avoid_task);
+    printf("[Req 1] Avoid task call rate: %f ms\n", runtime_average_avoid_task);
+    printf("[Req 2] See messages printed to stdout (starting with \"[Req 2]\")\n");
+    printf("[Req 3] See messages printed to stdout (starting with \"[Req 3]\")\n\n");
+    printf("Some extra parameters:\n");
+    printf("Number of illegal communications attempted (w/o go_ahead): %llu (%.2f %%)\n",
+            illegal_communications, 100 * ((float) illegal_communications / (float) total_communications));
+    printf("Number of legal communications made (w go_ahead): %llu (%.2f %%)\n",
+            total_communications - illegal_communications,
+            100 * ((float) (total_communications - illegal_communications) / (float) total_communications));
     printf("Average IDLE time every minor cycle: %f ms\n\n", runtime_average_sleep_time);
     printf("Summary of parameters:\n");
     printf("#_runs:\tNumber of times a given task has run\n");
