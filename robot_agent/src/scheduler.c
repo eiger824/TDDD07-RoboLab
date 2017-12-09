@@ -123,7 +123,7 @@ void scheduler_wait_for_timer(scheduler_t *ces)
  * @param task_id Task ID
  * @return Void
  */
-void scheduler_exec_task(scheduler_t *ces, int task_id)
+void scheduler_exec_task(int task_id)
 {
     switch(task_id)
     {
@@ -197,31 +197,29 @@ void scheduler_run(scheduler_t *ces)
     // Run start the time struct
     scheduler_start(ces);
 
-    // Start avoid period task timer
-//     timelib_timer_set(&avoid_period);
-
-    // Loop through all minor cycles in a big major cycle
     int i;
+    // Loop through all minor cycles in a big major cycle
     while(1)
     {
         for (i=0; i<nr_minor_cycles; ++i)
         {
-            // Control task runs every 500
-            // But when this task does NOT run (i.e. in minor cycles 1,2,3,4,6,7,8,9),
-            // we want to keep this slot free so the rest of the tasks' periods are respected
+            /************************ Control task **************************/
+
+            // To be run every 500ms. But when this task does NOT run
+            // (i.e. in minor cycles 1,2,3,4,6,7,8,9),
+            // we want to keep this slot free so the rest of the tasks'
+            // periods are respected
             if (i % 5 == 0)
             {
-                timelib_timer_set(&task_exec_time);
-                scheduler_exec_task(ces, s_TASK_CONTROL_ID);
-                if (timelib_timer_get(task_exec_time) > scheduler_get_deadline(s_TASK_CONTROL_ID))
-                    ++deadline_overruns[s_TASK_CONTROL_ID];
-                ++runtime_tasks[s_TASK_CONTROL_ID];
+                scheduler_process_task(s_TASK_CONTROL_ID, &task_exec_time);
             }
             else
             {
                 usleep(wcet_TASK_CONTROL);
             }
-            // Avoid task
+            /****************************************************************/
+
+            /************************ Avoid task ****************************/
             if (first_time)
             {
                 // The first time, just set the timer
@@ -244,42 +242,26 @@ void scheduler_run(scheduler_t *ces)
                     runtime_average_avoid_task = (runtime_average_avoid_task + current_sample_avoid_task) / 2;
                 }
             }
+            scheduler_process_task(s_TASK_AVOID_ID, &task_exec_time);
+            /****************************************************************/
 
-            timelib_timer_set(&task_exec_time);
-            scheduler_exec_task(ces, s_TASK_AVOID_ID);
-            if (timelib_timer_get(task_exec_time) > scheduler_get_deadline(s_TASK_AVOID_ID))
-                ++deadline_overruns[s_TASK_AVOID_ID];
-            ++runtime_tasks[s_TASK_AVOID_ID];
+            /************************ Navigate task *************************/
+            scheduler_process_task(s_TASK_NAVIGATE_ID, &task_exec_time);
+            /****************************************************************/
 
-            // Navigate task
-            timelib_timer_set(&task_exec_time);
-            scheduler_exec_task(ces, s_TASK_NAVIGATE_ID);
-            if (timelib_timer_get(task_exec_time) > scheduler_get_deadline(s_TASK_NAVIGATE_ID))
-                ++deadline_overruns[s_TASK_NAVIGATE_ID];
-            ++runtime_tasks[s_TASK_NAVIGATE_ID];
+            /************************ Refine task ***************************/
+            scheduler_process_task(s_TASK_REFINE_ID, &task_exec_time);
+            /****************************************************************/
 
-            // Refine task
-            timelib_timer_set(&task_exec_time);
-            scheduler_exec_task(ces, s_TASK_REFINE_ID);
-            if (timelib_timer_get(task_exec_time) > scheduler_get_deadline(s_TASK_REFINE_ID))
-                ++deadline_overruns[s_TASK_REFINE_ID];
-            ++runtime_tasks[s_TASK_REFINE_ID];
+            /************************ Report task ***************************/
+            scheduler_process_task(s_TASK_REPORT_ID, &task_exec_time);
+            /****************************************************************/
 
-            // Report task
-            timelib_timer_set(&task_exec_time);
-            scheduler_exec_task(ces, s_TASK_REPORT_ID);
-            if (timelib_timer_get(task_exec_time) > scheduler_get_deadline(s_TASK_REPORT_ID))
-                ++deadline_overruns[s_TASK_REPORT_ID];
-            ++runtime_tasks[s_TASK_REPORT_ID];
+            /************************ Mission task **************************/
+            scheduler_process_task(s_TASK_MISSION_ID, &task_exec_time);
+            /****************************************************************/
 
-            // Mission task
-            timelib_timer_set(&task_exec_time);
-            scheduler_exec_task(ces, s_TASK_MISSION_ID);
-            if (timelib_timer_get(task_exec_time) > scheduler_get_deadline(s_TASK_MISSION_ID))
-                ++deadline_overruns[s_TASK_MISSION_ID];
-            ++runtime_tasks[s_TASK_MISSION_ID];
-
-
+            /************************ Communicate task **********************/
             // Communicate task runs every 1000, at the first minor cycle
             // In this case, we don't need to sleep or wait as we do for the control task
             // since this task executes at the end of every minor cycle so the other tasks
@@ -289,12 +271,7 @@ void scheduler_run(scheduler_t *ces)
                 // Last check, if go ahead was received
                 if (g_go_ahead)
                 {
-                    // Communicate task
-                    timelib_timer_set(&task_exec_time);
-                    scheduler_exec_task(ces, s_TASK_COMMUNICATE_ID);
-                    if (timelib_timer_get(task_exec_time) > scheduler_get_deadline(s_TASK_COMMUNICATE_ID))
-                        ++deadline_overruns[s_TASK_COMMUNICATE_ID];
-                    ++runtime_tasks[s_TASK_COMMUNICATE_ID];
+                    scheduler_process_task(s_TASK_COMMUNICATE_ID, &task_exec_time);
                 }
                 else
                 {
@@ -302,8 +279,11 @@ void scheduler_run(scheduler_t *ces)
                 }
                 ++total_communications;
             }
+            /****************************************************************/
 
+            /*********************** IDLE time ******************************/
             // Wait until the end of the current minor cycle
+            // We calculate a 2-sample average of waiting times
             timelib_timer_set(&remaining_time);
             scheduler_wait_for_timer(ces);
             current_measurement = timelib_timer_get(remaining_time);
@@ -317,10 +297,9 @@ void scheduler_run(scheduler_t *ces)
             {
                 runtime_average_sleep_time = (current_measurement + runtime_average_sleep_time) / 2;
             }
+            /****************************************************************/
         }
     }
-
-
 }
 
 /*
@@ -454,4 +433,31 @@ void scheduler_dump_statistics()
             100 * (  ((float)scheduler_get_all_deadline_overruns() / (float)scheduler_get_all_task_cnt())));
     printf("****************************************************************\n");
 }
+
+void scheduler_process_task(int task_id, struct timeval *timer)
+{
+    int deadline;
+    double exec_time;
+
+    // Set timer structure
+    timelib_timer_set(timer);
+    // Execute the task
+    scheduler_exec_task(task_id);
+    // Obtain execution time
+    exec_time = timelib_timer_get(*timer);
+    // Fetch deadline
+    deadline = scheduler_get_deadline(task_id);
+    // Check for deadline overrun: if detected, add up counter; if not,
+    // just sleep until the deadline
+    if (exec_time > deadline)
+    {
+        ++deadline_overruns[task_id];
+    }
+    else
+    {
+        usleep((float)(deadline - exec_time) * 1000);
+    }
+    ++runtime_tasks[task_id];
+}
+
 

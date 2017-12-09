@@ -29,9 +29,11 @@ scheduler_t *scheduler_init(void); // Initialize cyclic executive scheduler
 void scheduler_destroy(scheduler_t *ces); // Deinitialize cyclic executive scheduler
 void scheduler_start(scheduler_t *ces); // Start scheduler
 void scheduler_wait_for_timer(scheduler_t *ces); // Wait (sleep) till end of minor cycle
-void scheduler_exec_task(scheduler_t *ces, int task_id); // Execute task
+void scheduler_exec_task(int task_id); // Execute task
 void scheduler_run(scheduler_t *ces); // Run scheduler
 int  scheduler_get_deadline(int task_id); // Get deadline for specific task
+// Wrapper for task execution: init timers, calculate deadline & exec time
+void scheduler_process_task(int task_id, struct timeval* timer);
 // Dump runtime statistics. No scheduler parameter is given since
 // this function shall be called from outside main routine
 void scheduler_dump_statistics();

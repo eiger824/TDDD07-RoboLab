@@ -112,7 +112,7 @@ void task_mission(void)
 					break;
 				// Stop tasks
 				case s_CMD_STOP :
-                    printf("Stop command received\n");
+                    printf("[Req.3] Stop command received\n");
                     timelib_timer_set(&t0);
 
 					g_task_mission.enabled 			= s_TRUE;
@@ -127,7 +127,7 @@ void task_mission(void)
 
 					// Get full control over robot
 					openinterface_drive(g_ois, 0, 0x8000);
-                    printf("Motors stopped after %f milliseconds\n", timelib_timer_get(t0));
+                    printf("[Req.3] Motors stopped after %f milliseconds\n", timelib_timer_get(t0));
 					break;
 				case s_CMD_GO_AHEAD :
 					// Go Ahead received
