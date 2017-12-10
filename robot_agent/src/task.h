@@ -39,6 +39,8 @@
 
 /* Time between victim found and message sent */
 struct timeval notify_victim_time;
+/* Time between STOP cmd and motors STOP */
+struct timeval motors_stop_time;
 // Counter with the number of times the communication task tries to run
 // without having received a go_ahead. Extern since it's defined in scheduler.c
 extern cnt_t illegal_communications;

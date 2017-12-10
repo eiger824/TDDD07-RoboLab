@@ -14,6 +14,8 @@
 /* project libraries */
 #include "task.h"
 
+static unsigned first_time = 1;
+
  /**
  * Sense, control, localization
  */
@@ -24,6 +26,9 @@ void task_control(void)
 	{
 		int speed;
 		int req_time;
+
+        // Reset first time variable
+        first_time = 1;
 
 		// Update sensors Odometer
 #ifndef s_CONFIG_TEST_ENABLE
@@ -100,4 +105,15 @@ void task_control(void)
 			g_tp_navigate_control.event = s_TASK_EVENT_RESET;
 		}
 	}
+    else
+    {
+        // Control task disabled, only when STOP command is sent
+        // Just print this information once
+        if (first_time)
+        {
+            printf("[Req.3] Motors stopped after %f milliseconds\n",
+                    timelib_timer_get(motors_stop_time));
+            first_time = 0;
+        }
+    }
 }
