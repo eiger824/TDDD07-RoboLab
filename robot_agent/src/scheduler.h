@@ -11,6 +11,7 @@
 #ifndef __SCHEDULER_H
 #define __SCHEDULER_H
 
+#include "def.h"
 /**
  * @brief Scheduler structure
  */
@@ -23,7 +24,6 @@ typedef struct s_SCHEDULER_STRUCT
 
 } scheduler_t;
 
-typedef unsigned long long cnt_t;
 /* -- Function Prototypes -- */
 scheduler_t *scheduler_init(void); // Initialize cyclic executive scheduler
 void scheduler_destroy(scheduler_t *ces); // Deinitialize cyclic executive scheduler

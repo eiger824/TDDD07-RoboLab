@@ -53,11 +53,9 @@ static float runtime_average_avoid_task = 0.0;
 // global constant representing the average waiting time every minor cycle
 // when all tasks have completed (i.e. IDLE time)
 static float runtime_average_sleep_time = 0.0;
-// Counter with the number of times the communication task tries to run
-// without having received a go_ahead
-static cnt_t illegal_communications = 0;
-// Counter with the total number of times the communication task runs
-static cnt_t total_communications = 0;
+
+cnt_t illegal_communications = 0;
+cnt_t total_communications = 0;
 /**
  * Initialize cyclic executive scheduler
  * @param minor Minor cycle in miliseconds (ms)
@@ -203,6 +201,10 @@ void scheduler_run(scheduler_t *ces)
     {
         for (i=0; i<nr_minor_cycles; ++i)
         {
+            /************************ Navigate task *************************/
+            scheduler_process_task(s_TASK_NAVIGATE_ID, &task_exec_time);
+            /****************************************************************/
+
             /************************ Control task **************************/
 
             // To be run every 500ms. But when this task does NOT run
@@ -220,33 +222,39 @@ void scheduler_run(scheduler_t *ces)
             /****************************************************************/
 
             /************************ Avoid task ****************************/
-            if (first_time)
+
+            // To be run every second minor cycle
+            if (i % 2 == 0)
             {
-                // The first time, just set the timer
-                timelib_timer_set(&avoid_period);
-                first_time = 0;
-            }
-            else
-            {
-                // After the first time, always get the elapsed time
-                current_sample_avoid_task = timelib_timer_reset(&avoid_period);
-                if (second_time)
+
+                if (first_time)
                 {
-                    // The second time, compute elapsed time AND set average to first sample
-                    runtime_average_avoid_task = current_sample_avoid_task;
-                    second_time = 0;
+                    // The first time, just set the timer
+                    timelib_timer_set(&avoid_period);
+                    first_time = 0;
                 }
                 else
                 {
-                    // Update runtime average of avoid task
-                    runtime_average_avoid_task = (runtime_average_avoid_task + current_sample_avoid_task) / 2;
+                    // After the first time, always get the elapsed time
+                    current_sample_avoid_task = timelib_timer_reset(&avoid_period);
+                    if (second_time)
+                    {
+                        // The second time, compute elapsed time AND set average to first sample
+                        runtime_average_avoid_task = current_sample_avoid_task;
+                        second_time = 0;
+                    }
+                    else
+                    {
+                        // Update runtime average of avoid task
+                        runtime_average_avoid_task = (runtime_average_avoid_task + current_sample_avoid_task) / 2;
+                    }
                 }
+                scheduler_process_task(s_TASK_AVOID_ID, &task_exec_time);
             }
-            scheduler_process_task(s_TASK_AVOID_ID, &task_exec_time);
-            /****************************************************************/
-
-            /************************ Navigate task *************************/
-            scheduler_process_task(s_TASK_NAVIGATE_ID, &task_exec_time);
+            else
+            {
+                usleep(wcet_TASK_AVOID);
+            }
             /****************************************************************/
 
             /************************ Refine task ***************************/
@@ -257,30 +265,17 @@ void scheduler_run(scheduler_t *ces)
             scheduler_process_task(s_TASK_REPORT_ID, &task_exec_time);
             /****************************************************************/
 
-            /************************ Mission task **************************/
-            scheduler_process_task(s_TASK_MISSION_ID, &task_exec_time);
-            /****************************************************************/
-
             /************************ Communicate task **********************/
             // Communicate task runs every 1000, at the first minor cycle
-            // In this case, we don't need to sleep or wait as we do for the control task
-            // since this task executes at the end of every minor cycle so the other tasks
-            // won't be affected
             if (i == 0)
             {
-                // Last check, if go ahead was received
-                if (g_go_ahead)
-                {
-                    scheduler_process_task(s_TASK_COMMUNICATE_ID, &task_exec_time);
-                }
-                else
-                {
-                    ++illegal_communications;
-                }
-                ++total_communications;
+                scheduler_process_task(s_TASK_COMMUNICATE_ID, &task_exec_time);
             }
             /****************************************************************/
 
+            /************************ Mission task **************************/
+            scheduler_process_task(s_TASK_MISSION_ID, &task_exec_time);
+            /****************************************************************/
             /*********************** IDLE time ******************************/
             // Wait until the end of the current minor cycle
             // We calculate a 2-sample average of waiting times

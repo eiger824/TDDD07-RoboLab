@@ -21,6 +21,7 @@
 
 /* -- Types -- */
 
+typedef unsigned long long cnt_t;
 
 /**
  * @brief Victim structure
