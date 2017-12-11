@@ -372,10 +372,12 @@ cnt_t scheduler_get_all_deadline_overruns()
     return sum;
 }
 
-void scheduler_dump_statistics()
+void scheduler_dump_statistics(scheduler_t *ces)
 {
     // First: output the number of tasks that were run
     printf("\n****************************************************************\n");
+    printf("Scheduler minor cycle: %d ms\n", ces->minor);
+    printf("Scheduler run-time: %.2f s\n", timelib_timer_get(ces->tv_started));
     printf("Nr. of performed tasks:\t\t%llu\n", scheduler_get_all_task_cnt());
     printf("Nr. of detected overruns:\t%llu\n\n", scheduler_get_all_deadline_overruns());
     printf("Application requirements:\n");

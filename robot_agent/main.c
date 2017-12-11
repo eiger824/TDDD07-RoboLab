@@ -29,7 +29,7 @@
 // Pointer to the scheduler structure, we want to be able to
 // free the allocated resources (destroy the scheduler) even
 // from the signal handler outside of the main function
-scheduler_t *ces;
+static scheduler_t *ces;
 
 /* -- Functions -- */
 /*
@@ -72,7 +72,7 @@ int main()
     task_destroy();
     // Deinit scheduler
     // Dump some nice stats
-    scheduler_dump_statistics();
+    scheduler_dump_statistics(ces);
 
     // Destroy scheduler
     scheduler_destroy(ces);
@@ -90,7 +90,7 @@ int sig_handler(int signo)
     {
         fprintf(stderr, "SIGINT received!\n");
         // Dump stats
-        scheduler_dump_statistics();
+        scheduler_dump_statistics(ces);
         // Deinit tasks
         task_destroy();
         // Destroy scheduler

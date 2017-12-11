@@ -44,7 +44,7 @@ int  scheduler_get_deadline(int task_id); // Get deadline for specific task
 void scheduler_process_task(int task_id, struct timeval* timer);
 // Dump runtime statistics. No scheduler parameter is given since
 // this function shall be called from outside main routine
-void scheduler_dump_statistics();
+void scheduler_dump_statistics(scheduler_t *ces);
 
 // Get the overall task count
 cnt_t scheduler_get_all_task_cnt();
