@@ -328,25 +328,25 @@ int scheduler_get_deadline(int task_id)
     {
         // Mission
         case 1 :
-            return ceil((float)1* (float)2.0);
+            return ceil((float)wcet_TASK_MISSION * (float)LOW_PRIO_FACTOR);
             // Navigate
         case 2:
-            return ceil((float)1* (float)2.0);
+            return ceil((float)wcet_TASK_NAVIGATE * (float)LOW_PRIO_FACTOR);
             // Control
         case 3:
-            return ceil((float)5* (float)1.5);
+            return ceil((float)wcet_TASK_CONTROL * (float)HIGH_PRIO_FACTOR);
             // Refine
         case 4:
-            return ceil((float)11* (float)2.0);
+            return ceil((float)wcet_TASK_REFINE * (float)LOW_PRIO_FACTOR);
             // Report
         case 5:
-            return ceil((float)1* (float)2.0);
+            return ceil((float)wcet_TASK_REPORT * (float)LOW_PRIO_FACTOR);
             // Communicate
         case 6:
-            return ceil((float)5* (float)1.5);
+            return ceil((float)wcet_TASK_COMMUNICATE * (float)HIGH_PRIO_FACTOR);
             // Collision detection
         case 7:
-            return ceil((float)17* (float)2.0);
+            return ceil((float)wcet_TASK_AVOID * (float)LOW_PRIO_FACTOR);
             // Other
         default :
             // Wrong
