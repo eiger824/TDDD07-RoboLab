@@ -193,11 +193,11 @@ void scheduler_run(scheduler_t *ces)
     scheduler_start(ces);
 
     int i;
-    // Loop through all minor cycles in a big major cycle
     // Get UNIX timestamp to be sychronized with the clock of the router
-    struct timeval tv_now;
-    timelib_timer_set(&tv_now);
-    usleep(1e6 -  tv_now.tv_usec);
+    double timestamp = timelib_unix_timestamp();
+    int sync_sleep_time = (int)round( (( ceil( timestamp / 1000.0)) - (timestamp / 1000.0)) * 1e6);
+    usleep(sync_sleep_time);
+    // Loop through all minor cycles in a big major cycle
     while(1)
     {
         for (i=0; i<nr_minor_cycles; ++i)
