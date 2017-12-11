@@ -298,12 +298,12 @@ void scheduler_run(scheduler_t *ces)
 }
 
 /*
- * Function:	scheduler_get_deadline
- * Brief:	Given a task id, it returns its computed deadline
+ * Function:	    scheduler_get_deadline
+ * Brief:	        Given a task id, it returns its computed deadline
  * @param task_id:	Guess what
- * Returns:	The deadline of the input task, in milliseconds.
- *          If the calculation would return a floating-point
- *          value, it will be rounded to the closest integer
+ * Returns:	        The deadline of the input task, in milliseconds.
+ *                  If the calculation would return a floating-point
+ *                  value, it will be rounded to the next higher integer
  */
 int scheduler_get_deadline(int task_id)
 {
@@ -377,7 +377,7 @@ void scheduler_dump_statistics(scheduler_t *ces)
     // First: output the number of tasks that were run
     printf("\n****************************************************************\n");
     printf("Scheduler minor cycle: %d ms\n", ces->minor);
-    printf("Scheduler run-time: %.2f s\n", timelib_timer_get(ces->tv_started));
+    printf("Scheduler run-time: %.2f s\n", (double)(timelib_timer_get(ces->tv_started) / 1000.0));
     printf("Nr. of performed tasks:\t\t%llu\n", scheduler_get_all_task_cnt());
     printf("Nr. of detected overruns:\t%llu\n\n", scheduler_get_all_deadline_overruns());
     printf("Application requirements:\n");
