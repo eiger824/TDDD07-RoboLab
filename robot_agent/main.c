@@ -26,6 +26,11 @@
 // 100 ms of minor cycle
 #define SCHEDULER_MINOR_CYCLE       100
 
+// Pointer to the scheduler structure, we want to be able to
+// free the allocated resources (destroy the scheduler) even
+// from the signal handler outside of the main function
+scheduler_t *ces;
+
 /* -- Functions -- */
 /*
  * Function:	    sig_handler
@@ -57,7 +62,7 @@ int main()
     // Init tasks
     task_init(1);
     // Init scheduler (Set minor and mayor cycle)
-    scheduler_t *ces = scheduler_init(SCHEDULER_MINOR_CYCLE);
+    ces = scheduler_init(SCHEDULER_MINOR_CYCLE);
 
     // Run scheduler
     scheduler_run(ces);
@@ -84,12 +89,18 @@ int sig_handler(int signo)
     if (signo == SIGINT)
     {
         fprintf(stderr, "SIGINT received!\n");
+        // Dump stats
         scheduler_dump_statistics();
-
+        // Deinit tasks
+        task_destroy();
+        // Destroy scheduler
+        scheduler_destroy(ces);
+        // And say goodbye! 
         printf("Goodbye from signal handler!\n");
         // Exit our program
-        exit(1);
+        exit(SIGINT);
     }
+    exit(signo);
 }
 
 
