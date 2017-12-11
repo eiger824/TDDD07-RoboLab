@@ -22,25 +22,23 @@
 #include "timelib.h"
 
 // Nr tasks
-#define NR_TASKS_TO_HANDLE      7
+#define     NR_TASKS_TO_HANDLE              7
 
 // Major cycle to use
-#define SCHEDULER_MAJOR_CYCLE             1000
+#define     SCHEDULER_MAJOR_CYCLE           1000
 
-/*
- * Factor to use when calculating the deadlines, multiple of the WCET
- */
-#define HIGH_PRIO_FACTOR        1.5
-#define LOW_PRIO_FACTOR         2.0
+// Factor to use when calculating the deadlines
+#define     HIGH_PRIO_FACTOR                1.5
+#define     LOW_PRIO_FACTOR                 2.0
 
 // Obtained WCETs from our measurements
-#define wcet_TASK_MISSION       1
-#define wcet_TASK_NAVIGATE      1
-#define wcet_TASK_CONTROL       5
-#define wcet_TASK_REFINE        11
-#define wcet_TASK_REPORT        1
-#define wcet_TASK_COMMUNICATE   5
-#define wcet_TASK_AVOID         17
+#define     wcet_TASK_MISSION               1
+#define     wcet_TASK_NAVIGATE              1
+#define     wcet_TASK_CONTROL               5
+#define     wcet_TASK_REFINE                11
+#define     wcet_TASK_REPORT                1
+#define     wcet_TASK_COMMUNICATE           5
+#define     wcet_TASK_AVOID                 17
 
 // Array holding the deadline overruns for every task
 // There are only 7 valid tasks, but there is a NOP
@@ -58,8 +56,6 @@ static float runtime_average_avoid_task = 0.0;
 // when all tasks have completed (i.e. IDLE time)
 static float runtime_average_sleep_time = 0.0;
 
-cnt_t illegal_communications = 0;
-cnt_t total_communications = 0;
 /**
  * Initialize cyclic executive scheduler
  * @param minor Minor cycle in miliseconds (ms)

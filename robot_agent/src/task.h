@@ -43,10 +43,10 @@ struct timeval notify_victim_time;
 struct timeval motors_stop_time;
 // Counter with the number of times the communication task tries to run
 // without having received a go_ahead. Extern since it's defined in scheduler.c
-extern cnt_t illegal_communications;
+cnt_t illegal_communications;
 // Counter with the total number of times the communication task runs.
 // Extern since it's defined in scheduler.c
-extern cnt_t total_communications;
+cnt_t total_communications;
 
 
 /**
