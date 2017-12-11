@@ -47,6 +47,10 @@ cnt_t illegal_communications;
 // Counter with the total number of times the communication task runs.
 // Extern since it's defined in scheduler.c
 cnt_t total_communications;
+// Counter with total victims read
+cnt_t total_victims;
+// Counter with victims whose location was not accurate
+cnt_t inaccurate_victims;
 
 
 /**

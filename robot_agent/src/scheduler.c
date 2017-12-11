@@ -390,6 +390,10 @@ void scheduler_dump_statistics(scheduler_t *ces)
     printf("Number of legal communications made (w go_ahead): %llu (%.2f %%)\n",
             total_communications - illegal_communications,
             100 * ((float) (total_communications - illegal_communications) / (float) total_communications));
+    printf("Number of total victims reported: %llu \n", total_victims);
+    printf("Number of inaccurate victim position reports: %llu (%.2f %%)\n",
+            inaccurate_victims,
+            100 * (((float)inaccurate_victims / (float)total_victims)));
     printf("Average IDLE time every minor cycle: %f ms\n\n", runtime_average_sleep_time);
     printf("Summary of parameters:\n");
     printf("#_runs:\tNumber of times a given task has run\n");
