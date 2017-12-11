@@ -64,7 +64,8 @@ void task_control(void)
 		// Send robot pose (add data to communication queue)
 		debug_printf("Pose: %d, %d, %f\n", g_robot->x, g_robot->y, g_robot->a);
 
-		doublylinkedlist_insert_end(g_list_send, g_robot, s_DATA_STRUCT_TYPE_ROBOT);
+// 		doublylinkedlist_insert_end(g_list_send, g_robot, s_DATA_STRUCT_TYPE_ROBOT);
+        doublylinkedlist_insert_end(g_list_send_robot, g_robot, s_DATA_STRUCT_TYPE_ROBOT);
 
 		// Check pipe for event
 		if(g_tp_navigate_control.event == s_TASK_EVENT_SET)

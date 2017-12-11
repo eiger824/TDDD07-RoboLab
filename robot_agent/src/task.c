@@ -30,6 +30,10 @@ udp_t				*g_udps; // UDP sockets connection
 
 /* Data lists */
 doublylinkedlist_t	*g_list_send; // Queue for data to be sent away (communication)
+doublylinkedlist_t	*g_list_send_victim; // Queue for data to be sent away (communication)
+doublylinkedlist_t	*g_list_send_robot; // Queue for data to be sent away (communication)
+doublylinkedlist_t	*g_list_send_pheromones; // Queue for data to be sent away (communication)
+doublylinkedlist_t	*g_list_send_stream; // Queue for data to be sent away (communication)
 
 /* Data queues */
 queue_t				*g_queue_mission; // Queue for data to mission task (commands, victims)
@@ -112,6 +116,10 @@ void task_init(int enable)
 	// Init Queues
 	// for communication
 	g_list_send = doublylinkedlist_init();
+    g_list_send_victim = doublylinkedlist_init();
+    g_list_send_robot = doublylinkedlist_init();
+    g_list_send_pheromones = doublylinkedlist_init();
+    g_list_send_stream = doublylinkedlist_init();
 	// for mission
 	g_queue_mission = queue_init();
 	// for navigate
@@ -184,6 +192,10 @@ void task_destroy(void)
 
 	// Deinit queues
 	doublylinkedlist_destroy(g_list_send);
+    doublylinkedlist_destroy(g_list_send_robot);
+    doublylinkedlist_destroy(g_list_send_victim);
+    doublylinkedlist_destroy(g_list_send_pheromones);
+    doublylinkedlist_destroy(g_list_send_stream);
 	queue_destroy(g_queue_mission);
 	queue_destroy(g_queue_navigate);
 }

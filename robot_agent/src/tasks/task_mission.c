@@ -198,7 +198,8 @@ void task_mission(void)
 			}
 
 			// Place data in a list
-			doublylinkedlist_insert_end(g_list_send, &stream, s_DATA_STRUCT_TYPE_STREAM);
+// 			doublylinkedlist_insert_end(g_list_send, &stream, s_DATA_STRUCT_TYPE_STREAM);
+            doublylinkedlist_insert_end(g_list_send_stream, &stream, s_DATA_STRUCT_TYPE_STREAM);
 			// Increment stream packet counter
 			g_task_mission_data.stream_counter++;
 		}

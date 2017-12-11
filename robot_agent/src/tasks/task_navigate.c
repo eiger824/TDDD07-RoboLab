@@ -64,7 +64,8 @@ void task_navigate(void)
 		// Send pheromone map sectors (add data to communication queue)
 		for(i = 0; i < g_phs->sector_count; i++)
 		{
-			doublylinkedlist_insert_end(g_list_send, phms[i], s_DATA_STRUCT_TYPE_PHEROMONE);
+// 			doublylinkedlist_insert_end(g_list_send, phms[i], s_DATA_STRUCT_TYPE_PHEROMONE);
+            doublylinkedlist_insert_end(g_list_send_pheromones, phms[i], s_DATA_STRUCT_TYPE_PHEROMONE);
 		}
 		// Free memory
 		pheromone_map_destroy(g_phs, phms);

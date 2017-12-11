@@ -110,8 +110,8 @@ void task_refine(void)
             }
             else
             {
-                fprintf(stderr, "Found victim's position innacurate (ID %s)\n",
-                        current_victim.id);
+                fprintf(stderr, "Found victim's position innacurate (ID %s, [%d,%d])\n",
+                        current_victim.id, current_victim.x, current_victim.y);
                 // Add up failure counter
                 ++inaccurate_victims;
             }
@@ -137,7 +137,12 @@ int check_accuracy_victim_location(victim_t found_victim)
             break;
     }
     // Last check, if tag (misteriously not found)
-    if (index == TOTAL_VICTIMS) return 1;
+    if (index == TOTAL_VICTIMS)
+    {
+        fprintf(stderr, "Victim not found in table...\n");
+        return 1;
+    }
+    printf("Victim was found at index: %d\n", index);
 
     return !(VICTIM_TABLE[index].x == found_victim.x &&
             VICTIM_TABLE[index].y == found_victim.y);

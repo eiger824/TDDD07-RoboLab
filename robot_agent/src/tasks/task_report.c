@@ -56,7 +56,8 @@ void task_report(void)
 				g_tp_report_mission.event = s_TASK_EVENT_SET;
 
 				// Send victim data (add data to communication queue)
-				doublylinkedlist_insert_end(g_list_send, &victim, s_DATA_STRUCT_TYPE_VICTIM);
+// 				doublylinkedlist_insert_end(g_list_send, &victim, s_DATA_STRUCT_TYPE_VICTIM);
+                doublylinkedlist_insert_end(g_list_send_victim, &victim, s_DATA_STRUCT_TYPE_VICTIM);
 			}
 
 			// Reset event

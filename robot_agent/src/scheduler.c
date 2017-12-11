@@ -28,13 +28,13 @@
 #define     SCHEDULER_MAJOR_CYCLE           1000
 
 // Factor to use when calculating the deadlines
-#define     HIGH_PRIO_FACTOR                1.5
+#define     HIGH_PRIO_FACTOR                1.1
 #define     LOW_PRIO_FACTOR                 2.0
 
 // Obtained WCETs from our measurements
 #define     wcet_TASK_MISSION               1
 #define     wcet_TASK_NAVIGATE              1
-#define     wcet_TASK_CONTROL               5
+#define     wcet_TASK_CONTROL               17 
 #define     wcet_TASK_REFINE                11
 #define     wcet_TASK_REPORT                1
 #define     wcet_TASK_COMMUNICATE           5
@@ -66,6 +66,7 @@ scheduler_t *scheduler_init(unsigned minor)
     // Allocate memory for Scheduler structure
     scheduler_t *ces = (scheduler_t *) malloc(sizeof(scheduler_t));
     assert(SCHEDULER_MAJOR_CYCLE % minor == 0);
+    // Set minor cycle
     ces->minor = minor;
     return ces;
 }
@@ -193,11 +194,21 @@ void scheduler_run(scheduler_t *ces)
 
     int i;
     // Loop through all minor cycles in a big major cycle
+    // Get UNIX timestamp to be sychronized with the clock of the router
+    struct timeval tv_now;
+    timelib_timer_set(&tv_now);
+    usleep(1e6 -  tv_now.tv_usec);
     while(1)
     {
         for (i=0; i<nr_minor_cycles; ++i)
         {
+            // Communicate task runs every 1000, at the fifth minor cycle(tdma slot 5)
+            if (i == 5)
+            {
+                scheduler_process_task(s_TASK_COMMUNICATE_ID, &task_exec_time);
+            }
             /************************ Navigate task *************************/
+
             scheduler_process_task(s_TASK_NAVIGATE_ID, &task_exec_time);
             /****************************************************************/
 
@@ -213,7 +224,7 @@ void scheduler_run(scheduler_t *ces)
             }
             else
             {
-                usleep(scheduler_get_deadline(s_TASK_CONTROL_ID));
+//                 usleep(scheduler_get_deadline(s_TASK_CONTROL_ID));
             }
             /****************************************************************/
 
@@ -249,7 +260,7 @@ void scheduler_run(scheduler_t *ces)
             }
             else
             {
-                usleep(scheduler_get_deadline(s_TASK_AVOID_ID));
+//                 usleep(scheduler_get_deadline(s_TASK_AVOID_ID));
             }
             /****************************************************************/
 
@@ -259,18 +270,6 @@ void scheduler_run(scheduler_t *ces)
 
             /************************ Report task ***************************/
             scheduler_process_task(s_TASK_REPORT_ID, &task_exec_time);
-            /****************************************************************/
-
-            /************************ Communicate task **********************/
-            // Communicate task runs every 1000, at the first minor cycle
-            if (i == 0)
-            {
-                scheduler_process_task(s_TASK_COMMUNICATE_ID, &task_exec_time);
-            }
-            else
-            {
-                usleep(scheduler_get_deadline(s_TASK_COMMUNICATE_ID));
-            }
             /****************************************************************/
 
             /************************ Mission task **************************/
@@ -376,8 +375,8 @@ void scheduler_dump_statistics(scheduler_t *ces)
 {
     // First: output the number of tasks that were run
     printf("\n****************************************************************\n");
-    printf("Scheduler minor cycle: %d ms\n", ces->minor);
-    printf("Scheduler run-time: %.2f s\n", (double)(timelib_timer_get(ces->tv_started) / 1000.0));
+    printf("Scheduler minor cycle:\t\t%d ms\n", ces->minor);
+    printf("Scheduler run-time:\t\t%.2f s\n", (double)(timelib_timer_get(ces->tv_started) / 1000.0));
     printf("Nr. of performed tasks:\t\t%llu\n", scheduler_get_all_task_cnt());
     printf("Nr. of detected overruns:\t%llu\n\n", scheduler_get_all_deadline_overruns());
     printf("Application requirements:\n");
@@ -453,10 +452,6 @@ void scheduler_process_task(int task_id, struct timeval *timer)
     if (exec_time > deadline)
     {
         ++deadline_overruns[task_id];
-    }
-    else
-    {
-        usleep((float)(deadline - exec_time) * 1000);
     }
     ++runtime_tasks[task_id];
 }
