@@ -217,7 +217,7 @@ void scheduler_run(scheduler_t *ces)
             }
             else
             {
-                usleep(wcet_TASK_CONTROL);
+                usleep(scheduler_get_deadline(s_TASK_CONTROL_ID));
             }
             /****************************************************************/
 
@@ -253,7 +253,7 @@ void scheduler_run(scheduler_t *ces)
             }
             else
             {
-                usleep(wcet_TASK_AVOID);
+                usleep(scheduler_get_deadline(s_TASK_AVOID_ID));
             }
             /****************************************************************/
 
@@ -270,6 +270,10 @@ void scheduler_run(scheduler_t *ces)
             if (i == 0)
             {
                 scheduler_process_task(s_TASK_COMMUNICATE_ID, &task_exec_time);
+            }
+            else
+            {
+                usleep(scheduler_get_deadline(s_TASK_COMMUNICATE_ID));
             }
             /****************************************************************/
 
