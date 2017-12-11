@@ -43,7 +43,7 @@ int main()
     printf("Hello world!\n");
 
     // Register our signal handler
-    if (signal(SIGINT, sig_handler) == SIG_ERR)
+    if (signal(SIGINT, (void(*)(int))sig_handler) == SIG_ERR)
     {
         fprintf(stderr, "Warning: won't catch SIGINT\n");
     }
