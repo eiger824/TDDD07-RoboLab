@@ -15,6 +15,7 @@
 #include <sys/time.h>
 #include <unistd.h>
 #include <math.h>
+#include <assert.h>
 /* project libraries */
 #include "scheduler.h"
 #include "task.h"
@@ -22,6 +23,9 @@
 
 // Nr tasks
 #define NR_TASKS_TO_HANDLE      7
+
+// Major cycle to use
+#define SCHEDULER_MAJOR_CYCLE             1000
 
 /*
  * Factor to use when calculating the deadlines, multiple of the WCET
@@ -61,11 +65,12 @@ cnt_t total_communications = 0;
  * @param minor Minor cycle in miliseconds (ms)
  * @return Pointer to scheduler structure
  */
-scheduler_t *scheduler_init(void)
+scheduler_t *scheduler_init(unsigned minor)
 {
     // Allocate memory for Scheduler structure
     scheduler_t *ces = (scheduler_t *) malloc(sizeof(scheduler_t));
-
+    assert(SCHEDULER_MAJOR_CYCLE % minor == 0);
+    ces->minor = minor;
     return ces;
 }
 
@@ -173,7 +178,6 @@ void scheduler_run(scheduler_t *ces)
     struct timeval remaining_time;
 
     // Scheduler details
-    int major_cycle;
     int nr_minor_cycles;
 
     // Runtime sample of avoid task period
@@ -186,11 +190,7 @@ void scheduler_run(scheduler_t *ces)
 
     int first_measurement = 1;
 
-    /* --- Set minor cycle period --- */
-    ces->minor = 100;
-
-    major_cycle = 1000;
-    nr_minor_cycles = major_cycle / ces->minor;
+    nr_minor_cycles = SCHEDULER_MAJOR_CYCLE / ces->minor;
 
     // Run start the time struct
     scheduler_start(ces);

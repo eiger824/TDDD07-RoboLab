@@ -25,7 +25,15 @@ typedef struct s_SCHEDULER_STRUCT
 } scheduler_t;
 
 /* -- Function Prototypes -- */
-scheduler_t *scheduler_init(void); // Initialize cyclic executive scheduler
+
+/*
+ * Function:	    scheduler_init
+ * Brief:	        Initialize cyclic executive scheduler
+ * @param minor:	The minor cycle to use
+ * @asserts:        If major cycle is not a multiple of the minor cycle
+ * Returns:	        Nothing
+*/
+scheduler_t *scheduler_init(unsigned minor); // Initialize cyclic executive scheduler
 void scheduler_destroy(scheduler_t *ces); // Deinitialize cyclic executive scheduler
 void scheduler_start(scheduler_t *ces); // Start scheduler
 void scheduler_wait_for_timer(scheduler_t *ces); // Wait (sleep) till end of minor cycle

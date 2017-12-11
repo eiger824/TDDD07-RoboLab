@@ -23,6 +23,9 @@
 #include "src/robot.h"
 #include "src/doublylinkedlist.h"
 
+// 100 ms of minor cycle
+#define SCHEDULER_MINOR_CYCLE       100
+
 /* -- Functions -- */
 /*
  * Function:	    sig_handler
@@ -54,7 +57,7 @@ int main()
     // Init tasks
     task_init(1);
     // Init scheduler (Set minor and mayor cycle)
-    scheduler_t *ces = scheduler_init();
+    scheduler_t *ces = scheduler_init(SCHEDULER_MINOR_CYCLE);
 
     // Run scheduler
     scheduler_run(ces);
