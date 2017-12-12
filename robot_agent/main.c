@@ -48,7 +48,7 @@ int sig_handler(int signo);
 int main()
 {
     // Say hello!
-    printf("Hello world!\n");
+    printf("Starting robot\n");
 
     // Register our signal handler
     if (signal(SIGINT, (void(*)(int))sig_handler) == SIG_ERR)

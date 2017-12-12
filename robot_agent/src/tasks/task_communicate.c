@@ -16,10 +16,8 @@
 #include "task.h"
 
 static unsigned packets_sent = 0;
-static unsigned max_allowed_packets = 13;
+static unsigned max_allowed_packets = 8;
 
-// We are only able to send 26 packets due to our network, so when only 26 packets are sent
-// we break form theloop
 /**
  * Communication (receive and send data)
  */
@@ -76,7 +74,7 @@ void task_communicate(void)
             else
             {
                 // Then break and exit the loop
-                fprintf(stderr, "Tried to transmit out of window, skipping rest of the tranmissions!\n");
+                //fprintf(stderr, "Tried to transmit ROBOT DATA out of window, skipping rest of the tranmissions!\n");
                 ++illegal_communications;
                 // Empty the list
                 doublylinkedlist_empty(g_list_send);
@@ -111,12 +109,12 @@ void task_communicate(void)
                 udp_broadcast(g_udps, udp_packet, udp_packet_len);
                 free(data);
                 ++packets_sent;
-        ++total_communications;
+                ++total_communications;
             }
             else
             {
                 // Then break and exit the loop
-                fprintf(stderr, "Tried to transmit out of window, skipping rest of the tranmissions!\n");
+                //fprintf(stderr, "Tried to transmit VICTIM DATA out of window, skipping rest of the tranmissions!\n");
                 ++illegal_communications;
                 // Empty the list
                 doublylinkedlist_empty(g_list_send_victim);
@@ -159,12 +157,12 @@ void task_communicate(void)
                 udp_broadcast(g_udps, udp_packet, udp_packet_len);
                 free(data);
                 ++packets_sent;
-        ++total_communications;
+                ++total_communications;
             }
             else
             {
                 // Then break and exit the loop
-                fprintf(stderr, "Tried to transmit out of window, skipping rest of the tranmissions!\n");
+                //fprintf(stderr, "Tried to transmit PHEROMONE DATA out of window, skipping rest of the tranmissions!\n");
                 ++illegal_communications;
                 // Empty the list
                 doublylinkedlist_empty(g_list_send_pheromones);
@@ -202,12 +200,12 @@ void task_communicate(void)
                 udp_broadcast(g_udps, udp_packet, udp_packet_len);
                 free(data);
                 ++packets_sent;
-        ++total_communications;
+                ++total_communications;
             }
             else
             {
                 // Then break and exit the loop
-                fprintf(stderr, "Tried to transmit STREAM DATA out of window, skipping rest of the tranmissions!\n");
+                //fprintf(stderr, "Tried to transmit STREAM DATA out of window, skipping rest of the tranmissions!\n");
                 ++illegal_communications;
                 // Empty the list
                 doublylinkedlist_empty(g_list_send_stream);

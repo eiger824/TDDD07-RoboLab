@@ -9,9 +9,7 @@
  */
 
 /* -- Includes -- */
-/* system libraries */
-#include <stdio.h>
-#include <stdlib.h>
+/* system libraries */ #include <stdio.h> #include <stdlib.h>
 #include <sys/time.h>
 #include <unistd.h>
 #include <math.h>
@@ -52,9 +50,9 @@ static cnt_t runtime_tasks[NR_TASKS_TO_HANDLE + 1]      = {0};
 
 // global constant representing the average period for the avoid task
 static float runtime_average_avoid_task = 0.0;
-// global constant representing the average waiting time every minor cycle
-// when all tasks have completed (i.e. IDLE time)
-static float runtime_average_sleep_time = 0.0;
+
+//sleep time to sync with mission countrol
+static useconds_t sync_sleep_time = 0;
 
 /**
  * Initialize cyclic executive scheduler
@@ -172,38 +170,37 @@ void scheduler_run(scheduler_t *ces)
     // Local variables (define variables here)
     struct timeval task_exec_time;
     struct timeval avoid_period;
-    struct timeval remaining_time;
 
     // Scheduler details
-    int nr_minor_cycles;
+    unsigned nr_minor_cycles;
 
     // Runtime sample of avoid task period
     float current_sample_avoid_task = 0.0;
-    // Runtime IDLE time every minor cycle
-    float current_measurement = 0.0;
 
     int first_time = 1;
     int second_time = 1;
-
-    int first_measurement = 1;
 
     nr_minor_cycles = SCHEDULER_MAJOR_CYCLE / ces->minor;
 
     // Run start the time struct
     scheduler_start(ces);
 
-    int i;
+    unsigned i;
     // Get UNIX timestamp to be sychronized with the clock of the router
-    double timestamp = timelib_unix_timestamp() / 1000.0;
-    int sync_sleep_time = (int)round( ( ceil( timestamp ) - timestamp ) * 1e6);
+    double timestamp = timelib_unix_timestamp();
+    // Compute the difference in microseconds with the next high millisecond
+    double diff = (ceil(timestamp) - timestamp) * 1000.0;
+    // Round the obtained microsecond difference to a useconds_t type, which is what
+    // we will haveto sleep to synchronize
+    sync_sleep_time = (useconds_t) round(diff);
     usleep(sync_sleep_time);
     // Loop through all minor cycles in a big major cycle
-    while(1)
+    while (1)
     {
         for (i=0; i<nr_minor_cycles; ++i)
         {
             // Communicate task runs every 1000, at the fifth minor cycle(tdma slot 5)
-            if (i == 5)
+            if (i == g_config.robot_id)
             {
                 scheduler_process_task(s_TASK_COMMUNICATE_ID, &task_exec_time);
             }
@@ -275,22 +272,10 @@ void scheduler_run(scheduler_t *ces)
             /************************ Mission task **************************/
             scheduler_process_task(s_TASK_MISSION_ID, &task_exec_time);
             /****************************************************************/
+
             /*********************** IDLE time ******************************/
             // Wait until the end of the current minor cycle
-            // We calculate a 2-sample average of waiting times
-            timelib_timer_set(&remaining_time);
             scheduler_wait_for_timer(ces);
-            current_measurement = timelib_timer_get(remaining_time);
-
-            if (first_measurement)
-            {
-                runtime_average_sleep_time = current_measurement;
-                first_measurement = 0;
-            }
-            else
-            {
-                runtime_average_sleep_time = (current_measurement + runtime_average_sleep_time) / 2;
-            }
             /****************************************************************/
         }
     }
@@ -377,6 +362,7 @@ void scheduler_dump_statistics(scheduler_t *ces)
     printf("\n****************************************************************\n");
     printf("Scheduler minor cycle:\t\t%d ms\n", ces->minor);
     printf("Scheduler run-time:\t\t%.2f s\n", (double)(timelib_timer_get(ces->tv_started) / 1000.0));
+    printf("Scheduler sync-time:\t\t%.2f ms\n", (float)(sync_sleep_time) / 1000.0);
     printf("Nr. of performed tasks:\t\t%llu\n", scheduler_get_all_task_cnt());
     printf("Nr. of detected overruns:\t%llu\n\n", scheduler_get_all_deadline_overruns());
     printf("Application requirements:\n");
@@ -384,17 +370,17 @@ void scheduler_dump_statistics(scheduler_t *ces)
     printf("[Req 2] See messages printed to stdout (starting with \"[Req 2]\")\n");
     printf("[Req 3] See messages printed to stdout (starting with \"[Req 3]\")\n\n");
     printf("Some extra parameters:\n");
-    printf("Number of illegal communications attempted (w/o go_ahead): %llu (%.2f %%)\n",
+    printf("Robot ID:\t\t\t\t\t\t\t%d\n", g_config.robot_id);
+    printf("Number of illegal communications attempted (w/o go_ahead):\t%llu (%.2f %%)\n",
             illegal_communications, 100 * ((float) illegal_communications / (float) total_communications));
-    printf("Number of legal communications made (w go_ahead): %llu (%.2f %%)\n",
+    printf("Number of legal communications made (w go_ahead):\t\t%llu (%.2f %%)\n",
             total_communications - illegal_communications,
             100 * ((float) (total_communications - illegal_communications) / (float) total_communications));
-    printf("Number of total victims reported: %llu \n", total_victims);
-    printf("Number of inaccurate victim position reports: %llu (%.2f %%)\n",
+    printf("Number of total victims reported:\t\t\t\t%llu \n", total_victims);
+    printf("Number of inaccurate victim position reports:\t\t\t%llu (%.2f %%)\n",
             inaccurate_victims,
             100 * (((float)inaccurate_victims / (float)total_victims)));
-    printf("Average IDLE time every minor cycle: %f ms\n\n", runtime_average_sleep_time);
-    printf("Summary of parameters:\n");
+    printf("\nSummary of scheduler parameters:\n");
     printf("#_runs:\tNumber of times a given task has run\n");
     printf("#_do:\tNumber of deadline overruns a given task has experienced\n");
     printf("%%_self:\tPercentage of overruns with respect to the number of\n");

@@ -52,10 +52,12 @@ static const victim_t VICTIM_TABLE[TOTAL_VICTIMS] =
  * Brief:	            Given a found victim, it checks whether its coordinates match
  *                      with the hardcoded values
  * @param found_victim:	Victim struct representing the victim found by the RFID reader
+ * @param dx:           The X difference between the found victim and the hardcoded value
+ * @param dy:           The Y difference between the found victim and the hardcoded value
  * Returns:	            On success, 0 will be returned to indicate that the location
  *                      of the victim is correct, 1 otherwise
 */
-int check_accuracy_victim_location(victim_t found_victim);
+int check_accuracy_victim_location(victim_t found_victim, double *dx, double *dy);
 
 /**
  * Refine position, localization
@@ -103,15 +105,16 @@ void task_refine(void)
             current_victim.y = g_robot->y;
             memcpy(&current_victim.id, &g_rfids->id, 11);
 
-            if (!check_accuracy_victim_location(current_victim))
+            double dx, dy;
+            if (!check_accuracy_victim_location(current_victim, &dx, &dy))
             {
                 printf("Found victim's position is accurate: [%d,%d], with ID %s\n",
                         current_victim.x, current_victim.y, current_victim.id);
             }
             else
             {
-                fprintf(stderr, "Found victim's position innacurate (ID %s, [%d,%d])\n",
-                        current_victim.id, current_victim.x, current_victim.y);
+                fprintf(stderr, "Found victim's position innacurate (ID %s, [%d,%d] ([%.1f,%.1f] offset))\n",
+                        current_victim.id, current_victim.x, current_victim.y, dx, dy);
                 // Add up failure counter
                 ++inaccurate_victims;
             }
@@ -127,9 +130,10 @@ void task_refine(void)
 	}
 }
 
-int check_accuracy_victim_location(victim_t found_victim)
+int check_accuracy_victim_location(victim_t found_victim, double *dx, double *dy)
 {
     unsigned index;
+    int accuracy;
     // First, find index of the found victim in the table
     for (index = 0; index < TOTAL_VICTIMS; ++index)
     {
@@ -142,8 +146,17 @@ int check_accuracy_victim_location(victim_t found_victim)
         fprintf(stderr, "Victim not found in table...\n");
         return 1;
     }
-    printf("Victim was found at index: %d\n", index);
-
-    return !(VICTIM_TABLE[index].x == found_victim.x &&
-            VICTIM_TABLE[index].y == found_victim.y);
+    else
+    {
+        accuracy = !(VICTIM_TABLE[index].x == found_victim.x &&
+                VICTIM_TABLE[index].y == found_victim.y);
+        // Victim location wrong, compute differences
+        if (accuracy)
+        {
+            *dx = found_victim.x - VICTIM_TABLE[index].x;
+            *dy = found_victim.y - VICTIM_TABLE[index].y;
+        }
+        // And return result
+        return accuracy;
+    }
 }
