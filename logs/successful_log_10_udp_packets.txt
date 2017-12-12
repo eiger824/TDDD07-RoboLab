@@ -1,0 +1,65 @@
+Starting robot
+[Req.2] Victim was found!
+Found victim's position innacurate, ID 01004B835E, x=2708,y=340, offset=[38,-15]
+[Req.2] Time elapsed between victim found and message sent: 454.050000 ms
+[Req.2] Victim was found!
+Found victim's position innacurate, ID 020053C80E, x=3096,y=671, offset=[-299,-199]
+[Req.2] Time elapsed between victim found and message sent: 157.420000 ms
+[Req.2] Victim was found!
+Found victim's position innacurate, ID 020053C80E, x=3198,y=712, offset=[-197,-158]
+[Req.2] Victim was found!
+Found victim's position innacurate, ID 020053A537, x=850,y=939, offset=[-125,-176]
+[Req.2] Time elapsed between victim found and message sent: 747.044000 ms
+[Req.3] Stop command received
+[Req.3] Gained control over motors after 0.030000 milliseconds
+[Req.3] Motors stopped after 472.927000 milliseconds
+Start command received
+[Req.2] Victim was found!
+Victim not found in table...
+Found victim's position innacurate, ID 0100441696, x=1219,y=1931, offset=[32765,76549488]
+[Req.2] Time elapsed between victim found and message sent: 682.161000 ms
+[Req.2] Victim was found!
+Found victim's position innacurate, ID 020053E0BA, x=1660,y=962, offset=[-185,37]
+[Req.2] Time elapsed between victim found and message sent: 980.644000 ms
+^CSIGINT received!
+
+****************************************************************
+Scheduler minor cycle:          100 ms
+Scheduler run-time:             155.56 s
+Scheduler sync-time:            773.09 ms
+Nr. of performed tasks:         7226
+Nr. of detected overruns:       56
+
+Application requirements:
+[Req 1] Avoid task call rate: 206.589562 ms
+[Req 2] See messages printed to stdout (starting with "[Req 2]")
+[Req 3] See messages printed to stdout (starting with "[Req 3]")
+
+Some extra parameters:
+Robot ID:                                                       5
+Number of illegal communications attempted (w/o go_ahead):      295 (10.00 %)
+Number of legal communications made (w go_ahead):               2655 (90.00 %)
+Number of total victims reported:                               6 
+Number of inaccurate victim position reports:                   6 (100.00 %)
+
+Summary of scheduler parameters:
+#_runs: Number of times a given task has run
+#_do:   Number of deadline overruns a given task has experienced
+%_self: Percentage of overruns with respect to the number of
+        times that task ran
+%_all:  Percentage of overruns with respect to the global number
+        of overruns
+
+SUMMARY
+-------------------
+        MISS            NAV             CON             REF             REP             COM             AVO
+        ----            ---             ---             ---             ---             ---             ---
+#_runs  1505            1506            301             1505            1505            151             753
+#_do    0               0               5               47              0               0               4
+%_self  0.00%           0.00%           1.66%           3.12%           0.00%           0.00%           0.53%
+%_all   0.00%           0.00%           8.93%           83.93%          0.00%           0.00%           7.14%
+
+OVERALL PERFORMANCE OF SCHEDULER:       99.23%
+OVERALL DEADLINE OVERRUNS OF SCHEDULER: 0.77%
+****************************************************************
+Goodbye from signal handler!

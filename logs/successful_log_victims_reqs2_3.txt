@@ -1,0 +1,74 @@
+Starting robot
+[Req.2] Victim was found!
+Found victim's position innacurate, ID 0200581542, x=4316,y=1524, offset=[166,-286]
+[Req.2] Victim was found!
+Found victim's position innacurate, ID 0200581542, x=4316,y=1524, offset=[166,-286]
+[Req.2] Victim was found!
+Found victim's position innacurate, ID 0200581542, x=4316,y=1524, offset=[166,-286]
+[Req.2] Time elapsed between victim found and message sent: 689.622000 ms
+[Req.2] Victim was found!
+Found victim's position innacurate, ID 02005097C0, x=1906,y=2664, offset=[16,84]
+[Req.2] Time elapsed between victim found and message sent: 673.452000 ms
+[Req.2] Victim was found!
+Found victim's position innacurate, ID 020053A537, x=694,y=1123, offset=[-281,8]
+[Req.2] Victim was found!
+Found victim's position innacurate, ID 020053A537, x=694,y=1123, offset=[-281,8]
+[Req.2] Time elapsed between victim found and message sent: 47.202000 ms
+[Req.2] Victim was found!
+Found victim's position innacurate, ID 020053A537, x=658,y=1073, offset=[-317,-42]
+[Req.2] Victim was found!
+Found victim's position innacurate, ID 020053A537, x=658,y=1073, offset=[-317,-42]
+[Req.3] Stop command received
+[Req.3] Gained control over motors after 0.024000 milliseconds
+[Req.3] Motors stopped after 490.951000 milliseconds
+Start command received
+[Req.2] Victim was found!
+Found victim's position innacurate, ID 020053C80E, x=3170,y=836, offset=[-225,-34]
+[Req.2] Victim was found!
+Found victim's position innacurate, ID 020053C80E, x=3147,y=909, offset=[-248,39]
+[Req.2] Time elapsed between victim found and message sent: 351.217000 ms
+[Req.3] Stop command received
+[Req.3] Gained control over motors after 0.029000 milliseconds
+[Req.3] Motors stopped after 479.596000 milliseconds
+^CSIGINT received!
+
+****************************************************************
+Scheduler minor cycle:          100 ms
+Scheduler run-time:             93.19 s
+Scheduler sync-time:            248.47 ms
+Nr. of performed tasks:         4474
+Nr. of detected overruns:       37
+
+Application requirements:
+[Req 1] Avoid task call rate: 199.988671 ms
+[Req 2] See messages printed to stdout (starting with "[Req 2]")
+[Req 3] See messages printed to stdout (starting with "[Req 3]")
+
+Some extra parameters:
+Robot ID:                                                       5
+Number of illegal communications attempted (w/o go_ahead):      182 (12.50 %)
+Number of legal communications made (w go_ahead):               1274 (87.50 %)
+Number of total victims reported:                               10 
+Number of inaccurate victim position reports:                   10 (100.00 %)
+
+Summary of scheduler parameters:
+#_runs: Number of times a given task has run
+#_do:   Number of deadline overruns a given task has experienced
+%_self: Percentage of overruns with respect to the number of
+        times that task ran
+%_all:  Percentage of overruns with respect to the global number
+        of overruns
+
+SUMMARY
+-------------------
+        MISS            NAV             CON             REF             REP             COM             AVO
+        ----            ---             ---             ---             ---             ---             ---
+#_runs  932             932             187             932             932             93              466
+#_do    0               1               3               33              0               0               0
+%_self  0.00%           0.11%           1.60%           3.54%           0.00%           0.00%           0.00%
+%_all   0.00%           2.70%           8.11%           89.19%          0.00%           0.00%           0.00%
+
+OVERALL PERFORMANCE OF SCHEDULER:       99.17%
+OVERALL DEADLINE OVERRUNS OF SCHEDULER: 0.83%
+****************************************************************
+Goodbye from signal handler!

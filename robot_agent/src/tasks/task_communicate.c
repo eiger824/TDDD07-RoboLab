@@ -16,7 +16,7 @@
 #include "task.h"
 
 static unsigned packets_sent = 0;
-static unsigned max_allowed_packets = 8;
+static unsigned max_allowed_packets = 10;
 
 /**
  * Communication (receive and send data)
@@ -42,177 +42,210 @@ void task_communicate(void)
         //In principle I want to send all the data in the buffer
         int last_id = g_list_send->count; // Massi thing
 
+        /* Reasoning */
+        // Go through the corresponding list if and only if the packet sent count
+        // is below the allowed limit
+        //
+        // In case of being below the limit, loop through the list to encode and
+        // send the next packet
+        //
+        // If while looping through the list we exceed the maximum allowed packet
+        // number, then simply free any possible allocated data and free the list.
+        // This is the main reason for the repeated if-condition both before and after
+        // the while-condition
+        //
+        // Then, the next list(s) won't even be entered, just freed
+
         // Send robot data 
-        while (g_list_send_robot->count != 0)
+        if (packets_sent < max_allowed_packets)
         {
-            seq++;
-            data = (void *)malloc(sizeof(robot_t));
-            doublylinkedlist_remove(g_list_send_robot, g_list_send_robot->first ,data, &data_type);
-
-            // Encode data into UDP packet
-            protocol_encode(udp_packet,
-                    &udp_packet_len,
-                    s_PROTOCOL_ADDR_BROADCAST,
-                    g_config.robot_id,
-                    g_config.robot_team,
-                    s_PROTOCOL_TYPE_DATA,
-                    seq,
-                    g_message_sequence_id,
-                    last_id,
-                    data_type,
-                    data);
-
-            if (packets_sent < max_allowed_packets)
+            while (g_list_send_robot->count != 0)
             {
-                // Then send
-                // Broadcast packet
-                udp_broadcast(g_udps, udp_packet, udp_packet_len);
-                free(data);
-                ++packets_sent;
-                ++total_communications;
-            }
-            else
-            {
-                // Then break and exit the loop
-                //fprintf(stderr, "Tried to transmit ROBOT DATA out of window, skipping rest of the tranmissions!\n");
-                ++illegal_communications;
-                // Empty the list
-                doublylinkedlist_empty(g_list_send);
-                free(data);
-                packets_sent = 0;
-                break;
+                if (packets_sent < max_allowed_packets)
+                {
+                    seq++;
+                    data = (void *)malloc(sizeof(robot_t));
+                    doublylinkedlist_remove(g_list_send_robot, g_list_send_robot->first ,data, &data_type);
+
+                    // Encode data into UDP packet
+                    protocol_encode(udp_packet,
+                            &udp_packet_len,
+                            s_PROTOCOL_ADDR_BROADCAST,
+                            g_config.robot_id,
+                            g_config.robot_team,
+                            s_PROTOCOL_TYPE_DATA,
+                            seq,
+                            g_message_sequence_id,
+                            last_id,
+                            data_type,
+                            data);
+
+                    // Then send
+                    // Broadcast packet
+                    udp_broadcast(g_udps, udp_packet, udp_packet_len);
+                    free(data);
+                    ++packets_sent;
+                    ++total_communications;
+                }
+                else
+                {
+                    // Then break and exit the loop
+                    ++illegal_communications;
+                    // Empty the list
+                    doublylinkedlist_empty(g_list_send_robot);
+                    break;
+                }
             }
         }
-        // Send victims 
-        while (g_list_send_victim->count != 0 )
+        else
         {
-            seq++;
-            data = (void *)malloc(sizeof(victim_t));
-            doublylinkedlist_remove(g_list_send_victim, g_list_send_victim->first ,data, &data_type);
-            // Encode data into UDP packet
-            protocol_encode(udp_packet,
-                    &udp_packet_len,
-                    s_PROTOCOL_ADDR_BROADCAST,
-                    g_config.robot_id,
-                    g_config.robot_team,
-                    s_PROTOCOL_TYPE_DATA,
-                    seq,
-                    g_message_sequence_id,
-                    last_id,
-                    data_type,
-                    data);
+            // Empty the list
+            doublylinkedlist_empty(g_list_send_robot);
+        }
+        // Send victims
+        if (packets_sent < max_allowed_packets)
+        {
+            while (g_list_send_victim->count != 0 )
+            {
+                if (packets_sent < max_allowed_packets)
+                {
+                    seq++;
+                    data = (void *)malloc(sizeof(victim_t));
+                    doublylinkedlist_remove(g_list_send_victim, g_list_send_victim->first ,data, &data_type);
+                    // Encode data into UDP packet
+                    protocol_encode(udp_packet,
+                            &udp_packet_len,
+                            s_PROTOCOL_ADDR_BROADCAST,
+                            g_config.robot_id,
+                            g_config.robot_team,
+                            s_PROTOCOL_TYPE_DATA,
+                            seq,
+                            g_message_sequence_id,
+                            last_id,
+                            data_type,
+                            data);
 
-            if (packets_sent < max_allowed_packets)
-            {
-                // Then send
-                // Broadcast packet
-                udp_broadcast(g_udps, udp_packet, udp_packet_len);
-                free(data);
-                ++packets_sent;
-                ++total_communications;
-            }
-            else
-            {
-                // Then break and exit the loop
-                //fprintf(stderr, "Tried to transmit VICTIM DATA out of window, skipping rest of the tranmissions!\n");
-                ++illegal_communications;
-                // Empty the list
-                doublylinkedlist_empty(g_list_send_victim);
-                free(data);
-                packets_sent = 0;
-                break;
-            }
-            if (!already_printed)
-            {
-                //Stop timer defined in task.h
-                printf("[Req.2] Time elapsed between victim found and message sent: %f ms\n",
-                        timelib_timer_get(notify_victim_time));
-                already_printed = 1;
+                    // Then send
+                    // Broadcast packet
+                    udp_broadcast(g_udps, udp_packet, udp_packet_len);
+                    free(data);
+                    ++packets_sent;
+                    ++total_communications;
+                }
+                else
+                {
+                    // Then break and exit the loop
+                    ++illegal_communications;
+                    // Empty the list
+                    doublylinkedlist_empty(g_list_send_victim);
+                    break;
+                }
+                if (!already_printed)
+                {
+                    //Stop timer defined in task.h
+                    printf("[Req.2] Time elapsed between victim found and message sent: %f ms\n",
+                            timelib_timer_get(notify_victim_time));
+                    already_printed = 1;
+                }
             }
         }
-
+        else
+        {
+            // Empty the list
+            doublylinkedlist_empty(g_list_send_victim);
+        }
         // Send pheromones
-        while (g_list_send_pheromones->count != 0) 
+        if (packets_sent < max_allowed_packets)
         {
-            seq++;
-            data = (void *)malloc(sizeof(pheromone_map_sector_t));
-            doublylinkedlist_remove(g_list_send_pheromones, g_list_send_pheromones->first ,data, &data_type);
-            // Encode data into UDP packet
-            protocol_encode(udp_packet,
-                    &udp_packet_len,
-                    s_PROTOCOL_ADDR_BROADCAST,
-                    g_config.robot_id,
-                    g_config.robot_team,
-                    s_PROTOCOL_TYPE_DATA,
-                    seq,
-                    g_message_sequence_id,
-                    last_id,
-                    data_type,
-                    data);
+            while (g_list_send_pheromones->count != 0) 
+            {
+                if (packets_sent < max_allowed_packets)
+                {
+                    seq++;
+                    data = (void *)malloc(sizeof(pheromone_map_sector_t));
+                    doublylinkedlist_remove(g_list_send_pheromones, g_list_send_pheromones->first ,data, &data_type);
+                    // Encode data into UDP packet
+                    protocol_encode(udp_packet,
+                            &udp_packet_len,
+                            s_PROTOCOL_ADDR_BROADCAST,
+                            g_config.robot_id,
+                            g_config.robot_team,
+                            s_PROTOCOL_TYPE_DATA,
+                            seq,
+                            g_message_sequence_id,
+                            last_id,
+                            data_type,
+                            data);
 
-            if (packets_sent < max_allowed_packets)
-            {
-                // Then send
-                // Broadcast packet
-                udp_broadcast(g_udps, udp_packet, udp_packet_len);
-                free(data);
-                ++packets_sent;
-                ++total_communications;
+                    // Then send
+                    // Broadcast packet
+                    udp_broadcast(g_udps, udp_packet, udp_packet_len);
+                    free(data);
+                    ++packets_sent;
+                    ++total_communications;
+                }
+                else
+                {
+                    // Then break and exit the loop
+                    ++illegal_communications;
+                    // Empty the list
+                    doublylinkedlist_empty(g_list_send_pheromones);
+                    break;
+                }
             }
-            else
-            {
-                // Then break and exit the loop
-                //fprintf(stderr, "Tried to transmit PHEROMONE DATA out of window, skipping rest of the tranmissions!\n");
-                ++illegal_communications;
-                // Empty the list
-                doublylinkedlist_empty(g_list_send_pheromones);
-                free(data);
-                packets_sent = 0;
-                break;
-            }
+        }
+        else
+        {
+            // Empty list
+            doublylinkedlist_empty(g_list_send_pheromones);
         }
 
         // Send stream data
-        while (g_list_send_stream->count !=0 )
+        if (packets_sent < max_allowed_packets)
         {
-            seq++;
-            data = (void *)malloc(sizeof(stream_t));
-            // Get data from the list
-            doublylinkedlist_remove(g_list_send_stream, g_list_send_stream->first ,data, &data_type);
-
-            // Encode data into UDP packet
-            protocol_encode(udp_packet,
-                    &udp_packet_len,
-                    s_PROTOCOL_ADDR_BROADCAST,
-                    g_config.robot_id,
-                    g_config.robot_team,
-                    s_PROTOCOL_TYPE_DATA,
-                    seq,
-                    g_message_sequence_id,
-                    last_id,
-                    data_type,
-                    data);
-
-            if (packets_sent < max_allowed_packets)
+            while (g_list_send_stream->count !=0 )
             {
-                // Then send
-                // Broadcast packet
-                udp_broadcast(g_udps, udp_packet, udp_packet_len);
-                free(data);
-                ++packets_sent;
-                ++total_communications;
+                if (packets_sent < max_allowed_packets)
+                {
+                    seq++;
+                    data = (void *)malloc(sizeof(stream_t));
+                    // Get data from the list
+                    doublylinkedlist_remove(g_list_send_stream, g_list_send_stream->first ,data, &data_type);
+
+                    // Encode data into UDP packet
+                    protocol_encode(udp_packet,
+                            &udp_packet_len,
+                            s_PROTOCOL_ADDR_BROADCAST,
+                            g_config.robot_id,
+                            g_config.robot_team,
+                            s_PROTOCOL_TYPE_DATA,
+                            seq,
+                            g_message_sequence_id,
+                            last_id,
+                            data_type,
+                            data);
+
+                    // Then send
+                    // Broadcast packet
+                    udp_broadcast(g_udps, udp_packet, udp_packet_len);
+                    free(data);
+                    ++packets_sent;
+                    ++total_communications;
+                }
+                else
+                {
+                    // Then break and exit the loop
+                    ++illegal_communications;
+                    // Empty the list
+                    doublylinkedlist_empty(g_list_send_stream);
+                    break;
+                }
             }
-            else
-            {
-                // Then break and exit the loop
-                //fprintf(stderr, "Tried to transmit STREAM DATA out of window, skipping rest of the tranmissions!\n");
-                ++illegal_communications;
-                // Empty the list
-                doublylinkedlist_empty(g_list_send_stream);
-                free(data);
-                packets_sent = 0;
-                break;
-            }
+        }
+        else
+        {
+            // Empty list
+            doublylinkedlist_empty(g_list_send_stream);
         }
 
         // Toggle variable for next send time
