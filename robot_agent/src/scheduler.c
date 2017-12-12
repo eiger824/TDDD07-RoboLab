@@ -28,8 +28,7 @@
 #define     SCHEDULER_MAJOR_CYCLE           1000
 
 // Factor to use when calculating the deadlines
-#define     HIGH_PRIO_FACTOR                1.1
-#define     LOW_PRIO_FACTOR                 2.0
+#define     FACTOR                          1.1
 
 // Obtained WCETs from our measurements
 #define     wcet_TASK_MISSION               1
@@ -194,7 +193,12 @@ void scheduler_run(scheduler_t *ces)
     {
         for (i=0; i<nr_minor_cycles; ++i)
         {
-            // Communicate task runs every 1000, at the fifth minor cycle(tdma slot 5)
+            // Set timer structure for deadline calculation at the start
+            // of every minor cycle
+            timelib_timer_set(&task_exec_time);
+
+            // Communicate task runs every 1000, at the fifth minor
+            // cycle(tdma slot 5)
             if (i == g_config.robot_id)
             {
                 scheduler_process_task(s_TASK_COMMUNICATE_ID, &task_exec_time);
@@ -248,43 +252,86 @@ int scheduler_get_deadline(int task_id)
      * We are going to assume a constant factor to calculate the
      * deadlines of the tasks based on the WCETs.
      *
-     * DEADLINE_k = WCET_k * [LOW|HIGH]_PRIO_FACTOR
+     * DEADLINE_k = WCET_k * PRIO_FACTOR
      *
-     * So, for instance, if [LOW|HIGH]_PRIO_FACTOR = 1, it will mean that D_t = WCET_t;
+     * So, for instance, if FACTOR = 1,
+     * it will mean that D_t = WCET_t;
      *
-     * Whether it's LOW or HIGH depends on if the task is a critical task
-     * as in Control and communicate, for instance.
-     * These two tasks are to be completed "as soon as possible", so
-     * it's not a good idea to be very permissive with their deadlines.
+     * This factor has been chosen to be 1.1 since it provides a 10%
+     * safeguard for a given task above its WCET
+     *
+     * We know that except for minor cycles 0 and 5, a minor cycle looks
+     * as follows:
+     *
+     * |___________________________
+     * |  Navigate | REF| REP| MISS|
+     * |___________|____|____|_____|__________________________|
+     * 0                                                      100ms
+     *
+     * But in the special case of cycle 5, when all tasks run:
+     *
+     * |
+     * |_________________________________________________
+     * | Communicate| Navigate| CTRL| AVOID |REF|REP|MISS|
+     * |____________|_________|_____|_______|___|___|____|____|
+     * 0                                                      100ms
+     *
+     * That is why we take into consideration the 5th cycle to calculate
+     * the deadline for all tasks
      */
+    int accumulate = 0;
     switch (task_id)
     {
-        // Mission
-        case 1 :
-            return ceil((float)wcet_TASK_MISSION * (float)LOW_PRIO_FACTOR);
-            // Navigate
-        case 2:
-            return ceil((float)wcet_TASK_NAVIGATE * (float)LOW_PRIO_FACTOR);
-            // Control
-        case 3:
-            return ceil((float)wcet_TASK_CONTROL * (float)HIGH_PRIO_FACTOR);
-            // Refine
-        case 4:
-            return ceil((float)wcet_TASK_REFINE * (float)LOW_PRIO_FACTOR);
-            // Report
-        case 5:
-            return ceil((float)wcet_TASK_REPORT * (float)LOW_PRIO_FACTOR);
-            // Communicate
-        case 6:
-            return ceil((float)wcet_TASK_COMMUNICATE * (float)HIGH_PRIO_FACTOR);
-            // Collision detection
-        case 7:
-            return ceil((float)wcet_TASK_AVOID * (float)LOW_PRIO_FACTOR);
-            // Other
-        default :
+        case 1 :// Mission
+            // Sum of all previous WCETs
+            accumulate += wcet_TASK_COMMUNICATE;
+            accumulate += wcet_TASK_NAVIGATE;
+            accumulate += wcet_TASK_CONTROL;
+            accumulate += wcet_TASK_AVOID;
+            accumulate += wcet_TASK_REFINE;
+            accumulate += wcet_TASK_REPORT;
+            accumulate += wcet_TASK_MISSION;
+            break;
+        case 2:// Navigate
+            accumulate += wcet_TASK_COMMUNICATE;
+            accumulate += wcet_TASK_NAVIGATE;
+            break;
+        case 3:// Control
+            accumulate += wcet_TASK_COMMUNICATE;
+            accumulate += wcet_TASK_NAVIGATE;
+            accumulate += wcet_TASK_CONTROL;
+            break;
+        case 4:// Refine
+            accumulate += wcet_TASK_COMMUNICATE;
+            accumulate += wcet_TASK_NAVIGATE;
+            accumulate += wcet_TASK_CONTROL;
+            accumulate += wcet_TASK_AVOID;
+            accumulate += wcet_TASK_REFINE;
+            break;
+        case 5:// Report
+            accumulate += wcet_TASK_COMMUNICATE;
+            accumulate += wcet_TASK_NAVIGATE;
+            accumulate += wcet_TASK_CONTROL;
+            accumulate += wcet_TASK_AVOID;
+            accumulate += wcet_TASK_REFINE;
+            accumulate += wcet_TASK_REPORT;
+            break;
+        case 6:// Communicate
+            accumulate += wcet_TASK_COMMUNICATE;
+            break;
+        case 7:// Avoid
+            accumulate += wcet_TASK_COMMUNICATE;
+            accumulate += wcet_TASK_NAVIGATE;
+            accumulate += wcet_TASK_CONTROL;
+            accumulate += wcet_TASK_AVOID;
+            break;
+        default:
             // Wrong
             return -1;
+
     }
+    // And return the accumulated time times the factor
+    return ceil((float) accumulate * FACTOR);
 }
 
 cnt_t scheduler_get_all_task_cnt()
@@ -396,9 +443,7 @@ void scheduler_process_task(int task_id, struct timeval *timer)
     int deadline;
     double exec_time;
 
-    // Set timer structure
-    timelib_timer_set(timer);
-    // Execute the task
+   // Execute the task
     scheduler_exec_task(task_id);
     // Obtain execution time
     exec_time = timelib_timer_get(*timer);
