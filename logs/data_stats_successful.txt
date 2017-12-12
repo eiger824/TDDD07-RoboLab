@@ -21,9 +21,10 @@ Number of total victims reported:                               0
 Number of inaccurate victim position reports:                   0 (-nan %)
 
 Communication statistics:
-data_type               ROBOT   VICTIM  PHEROMONE       STREAM
+data_type               ROBOT   VICTIM  PHEROM  STREAM
 #_packets_2_send        55      0       2200    421
-#_packets_sent  55      0       225     0
+#_packets_sent          55      0       225     0
+%_communications        100.00% -nan%   10.23%  0.00%
 
 Summary of scheduler parameters:
 #_runs: Number of times a given task has run

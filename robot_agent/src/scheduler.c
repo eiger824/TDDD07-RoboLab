@@ -322,6 +322,7 @@ cnt_t scheduler_get_all_deadline_overruns()
 
 void scheduler_dump_statistics(scheduler_t *ces)
 {
+    unsigned i;
     double scheduler_run_time =  (double)(timelib_timer_get(ces->tv_started) / 1000.0);
     // First: output the number of tasks that were run
     printf("\n****************************************************************\n");
@@ -346,12 +347,23 @@ void scheduler_dump_statistics(scheduler_t *ces)
             inaccurate_victims,
             100 * (((float)inaccurate_victims / (float)total_victims)));
     printf("\nCommunication statistics:\n");
-    printf("data_type\t\tROBOT\tVICTIM\tPHEROMONE\tSTREAM\n");
-    printf("#_packets_2_send\t%llu\t%llu\t%llu\t%llu\n",
-            total_data_count[0], total_data_count[1], total_data_count[2], total_data_count[3]);
-    printf("#_packets_sent\t%llu\t%llu\t%llu\t%llu\n",
-            actual_data_count[0],actual_data_count[1],actual_data_count[2],actual_data_count[3]);
-    printf("\nSummary of scheduler parameters:\n");
+    printf("data_type\t\tROBOT\tVICTIM\tPHEROM\tSTREAM\n");
+    printf("#_packets_2_send\t");
+    for (i=0; i<4; ++i)
+    {
+        printf("%llu\t", total_data_count[i]);
+    }
+    printf("\n#_packets_sent\t\t");
+    for (i=0; i<4; ++i)
+    {
+        printf("%llu\t", actual_data_count[i]);
+    }
+    printf("\n%%_communications\t");
+    for (i=0; i<4; ++i)
+    {
+        printf("%.2f%%\t", 100 * (float)(actual_data_count[i]) / (float)(total_data_count[i]));
+    }
+    printf("\n\nSummary of scheduler parameters:\n");
     printf("#_runs:\tNumber of times a given task has run\n");
     printf("#_do:\tNumber of deadline overruns a given task has experienced\n");
     printf("%%_self:\tPercentage of overruns with respect to the number of\n");
@@ -361,7 +373,6 @@ void scheduler_dump_statistics(scheduler_t *ces)
     printf("SUMMARY\n-------------------\n");
     printf("\tMISS\t\tNAV\t\tCON\t\tREF\t\tREP\t\tCOM\t\tAVO\n");
     printf("\t----\t\t---\t\t---\t\t---\t\t---\t\t---\t\t---\n");
-    unsigned i;
     printf("#_runs\t");
     for (i=1; i<NR_TASKS_TO_HANDLE + 1; ++i)
     {
