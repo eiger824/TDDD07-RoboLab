@@ -57,7 +57,7 @@ static const victim_t VICTIM_TABLE[TOTAL_VICTIMS] =
  * Returns:	            On success, 0 will be returned to indicate that the location
  *                      of the victim is correct, 1 otherwise
 */
-int check_accuracy_victim_location(victim_t found_victim, double *dx, double *dy);
+int check_accuracy_victim_location(victim_t found_victim, int *dx, int *dy);
 
 /**
  * Refine position, localization
@@ -105,7 +105,7 @@ void task_refine(void)
             current_victim.y = g_robot->y;
             memcpy(&current_victim.id, &g_rfids->id, 11);
 
-            double dx, dy;
+            int dx, dy;
             if (!check_accuracy_victim_location(current_victim, &dx, &dy))
             {
                 printf("Found victim's position is accurate: [%d,%d], with ID %s\n",
@@ -113,7 +113,7 @@ void task_refine(void)
             }
             else
             {
-                fprintf(stderr, "Found victim's position innacurate (ID %s, [%d,%d] ([%.1f,%.1f] offset))\n",
+                fprintf(stderr, "Found victim's position innacurate, ID %s, x=%d,y=%d, offset=[%d,%d]\n",
                         current_victim.id, current_victim.x, current_victim.y, dx, dy);
                 // Add up failure counter
                 ++inaccurate_victims;
@@ -130,7 +130,7 @@ void task_refine(void)
 	}
 }
 
-int check_accuracy_victim_location(victim_t found_victim, double *dx, double *dy)
+int check_accuracy_victim_location(victim_t found_victim, int *dx, int *dy)
 {
     unsigned index;
     int accuracy;

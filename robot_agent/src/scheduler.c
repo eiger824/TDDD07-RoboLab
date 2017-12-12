@@ -9,7 +9,9 @@
  */
 
 /* -- Includes -- */
-/* system libraries */ #include <stdio.h> #include <stdlib.h>
+/* system libraries */
+#include <stdio.h>
+#include <stdlib.h>
 #include <sys/time.h>
 #include <unistd.h>
 #include <math.h>
@@ -32,7 +34,7 @@
 // Obtained WCETs from our measurements
 #define     wcet_TASK_MISSION               1
 #define     wcet_TASK_NAVIGATE              1
-#define     wcet_TASK_CONTROL               17 
+#define     wcet_TASK_CONTROL               17
 #define     wcet_TASK_REFINE                11
 #define     wcet_TASK_REPORT                1
 #define     wcet_TASK_COMMUNICATE           5
@@ -47,9 +49,6 @@ static cnt_t deadline_overruns[NR_TASKS_TO_HANDLE + 1]  = {0};
 // A big array which counts the performed tasks over
 // the execution time of the program
 static cnt_t runtime_tasks[NR_TASKS_TO_HANDLE + 1]      = {0};
-
-// global constant representing the average period for the avoid task
-static float runtime_average_avoid_task = 0.0;
 
 //sleep time to sync with mission countrol
 static useconds_t sync_sleep_time = 0;
@@ -169,16 +168,9 @@ void scheduler_run(scheduler_t *ces)
 {
     // Local variables (define variables here)
     struct timeval task_exec_time;
-    struct timeval avoid_period;
 
     // Scheduler details
     unsigned nr_minor_cycles;
-
-    // Runtime sample of avoid task period
-    float current_sample_avoid_task = 0.0;
-
-    int first_time = 1;
-    int second_time = 1;
 
     nr_minor_cycles = SCHEDULER_MAJOR_CYCLE / ces->minor;
 
@@ -186,10 +178,10 @@ void scheduler_run(scheduler_t *ces)
     scheduler_start(ces);
 
     unsigned i;
-    // Get UNIX timestamp to be sychronized with the clock of the router
-    double timestamp = timelib_unix_timestamp();
-    // Compute the difference in microseconds with the next high millisecond
-    double diff = (ceil(timestamp) - timestamp) * 1000.0;
+    // Get UNIX timestamp to be sychronized with the clock of the router, in seconds
+    double timestamp = timelib_unix_timestamp() / 1e3;
+    // Compute the difference in microseconds with the next higher second
+    double diff = (ceil(timestamp) - timestamp) * 1e6;
     // Round the obtained microsecond difference to a useconds_t type, which is what
     // we will haveto sleep to synchronize
     sync_sleep_time = (useconds_t) round(diff);
@@ -219,10 +211,6 @@ void scheduler_run(scheduler_t *ces)
             {
                 scheduler_process_task(s_TASK_CONTROL_ID, &task_exec_time);
             }
-            else
-            {
-//                 usleep(scheduler_get_deadline(s_TASK_CONTROL_ID));
-            }
             /****************************************************************/
 
             /************************ Avoid task ****************************/
@@ -230,34 +218,7 @@ void scheduler_run(scheduler_t *ces)
             // To be run every second minor cycle
             if (i % 2 == 0)
             {
-
-                if (first_time)
-                {
-                    // The first time, just set the timer
-                    timelib_timer_set(&avoid_period);
-                    first_time = 0;
-                }
-                else
-                {
-                    // After the first time, always get the elapsed time
-                    current_sample_avoid_task = timelib_timer_reset(&avoid_period);
-                    if (second_time)
-                    {
-                        // The second time, compute elapsed time AND set average to first sample
-                        runtime_average_avoid_task = current_sample_avoid_task;
-                        second_time = 0;
-                    }
-                    else
-                    {
-                        // Update runtime average of avoid task
-                        runtime_average_avoid_task = (runtime_average_avoid_task + current_sample_avoid_task) / 2;
-                    }
-                }
                 scheduler_process_task(s_TASK_AVOID_ID, &task_exec_time);
-            }
-            else
-            {
-//                 usleep(scheduler_get_deadline(s_TASK_AVOID_ID));
             }
             /****************************************************************/
 
@@ -358,15 +319,16 @@ cnt_t scheduler_get_all_deadline_overruns()
 
 void scheduler_dump_statistics(scheduler_t *ces)
 {
+    double scheduler_run_time =  (double)(timelib_timer_get(ces->tv_started) / 1000.0);
     // First: output the number of tasks that were run
     printf("\n****************************************************************\n");
     printf("Scheduler minor cycle:\t\t%d ms\n", ces->minor);
-    printf("Scheduler run-time:\t\t%.2f s\n", (double)(timelib_timer_get(ces->tv_started) / 1000.0));
+    printf("Scheduler run-time:\t\t%.2f s\n", scheduler_run_time);
     printf("Scheduler sync-time:\t\t%.2f ms\n", (float)(sync_sleep_time) / 1000.0);
     printf("Nr. of performed tasks:\t\t%llu\n", scheduler_get_all_task_cnt());
     printf("Nr. of detected overruns:\t%llu\n\n", scheduler_get_all_deadline_overruns());
     printf("Application requirements:\n");
-    printf("[Req 1] Avoid task call rate: %f ms\n", runtime_average_avoid_task);
+    printf("[Req 1] Avoid task call rate: %f ms\n", 1e3 / ((float)runtime_tasks[s_TASK_AVOID_ID] / (float)scheduler_run_time));
     printf("[Req 2] See messages printed to stdout (starting with \"[Req 2]\")\n");
     printf("[Req 3] See messages printed to stdout (starting with \"[Req 3]\")\n\n");
     printf("Some extra parameters:\n");
