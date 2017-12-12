@@ -199,31 +199,20 @@ void scheduler_run(scheduler_t *ces)
             {
                 scheduler_process_task(s_TASK_COMMUNICATE_ID, &task_exec_time);
             }
-            /************************ Navigate task *************************/
 
+            /************************ Navigate task *************************/
             scheduler_process_task(s_TASK_NAVIGATE_ID, &task_exec_time);
             /****************************************************************/
 
-            /************************ Control task **************************/
-
-            // To be run every 500ms. But when this task does NOT run
-            // (i.e. in minor cycles 1,2,3,4,6,7,8,9),
-            // we want to keep this slot free so the rest of the tasks'
-            // periods are respected
+            // To be run every 500ms
             if (i % 5 == 0)
             {
+                /************************ Control task **************************/
                 scheduler_process_task(s_TASK_CONTROL_ID, &task_exec_time);
-            }
-            /****************************************************************/
-
-            /************************ Avoid task ****************************/
-
-            // To be run every second minor cycle
-            if (i % 2 == 0)
-            {
+                /************************ Avoid task ****************************/
                 scheduler_process_task(s_TASK_AVOID_ID, &task_exec_time);
+                /****************************************************************/
             }
-            /****************************************************************/
 
             /************************ Refine task ***************************/
             scheduler_process_task(s_TASK_REFINE_ID, &task_exec_time);
