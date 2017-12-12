@@ -1,0 +1,43 @@
+Starting robot
+^CSIGINT received!
+
+****************************************************************
+Scheduler minor cycle:          100 ms
+Scheduler run-time:             17.26 s
+Scheduler sync-time:            108.11 ms
+Nr. of performed tasks:         751
+Nr. of detected overruns:       4
+
+Application requirements:
+[Req 1] Avoid task call rate: 221.282266 ms
+[Req 2] See messages printed to stdout (starting with "[Req 2]")
+[Req 3] See messages printed to stdout (starting with "[Req 3]")
+
+Some extra parameters:
+Robot ID:                                                       5
+Number of illegal communications attempted (w/o go_ahead):      31 (12.11 %)
+Number of legal communications made (w go_ahead):               225 (87.89 %)
+Number of total victims reported:                               0 
+Number of inaccurate victim position reports:                   0 (-nan %)
+
+Summary of scheduler parameters:
+#_runs: Number of times a given task has run
+#_do:   Number of deadline overruns a given task has experienced
+%_self: Percentage of overruns with respect to the number of
+        times that task ran
+%_all:  Percentage of overruns with respect to the global number
+        of overruns
+
+SUMMARY
+-------------------
+        MISS            NAV             CON             REF             REP             COM             AVO
+        ----            ---             ---             ---             ---             ---             ---
+#_runs  156             157             32              156             156             16              78
+#_do    0               0               1               3               0               0               0
+%_self  0.00%           0.00%           3.12%           1.92%           0.00%           0.00%           0.00%
+%_all   0.00%           0.00%           25.00%          75.00%          0.00%           0.00%           0.00%
+
+OVERALL PERFORMANCE OF SCHEDULER:       99.47%
+OVERALL DEADLINE OVERRUNS OF SCHEDULER: 0.53%
+****************************************************************
+Goodbye from signal handler!

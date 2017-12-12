@@ -168,14 +168,10 @@ void scheduler_run(scheduler_t *ces)
 {
     // Local variables (define variables here)
     struct timeval task_exec_time;
-
     // Scheduler details
     unsigned nr_minor_cycles;
 
     nr_minor_cycles = SCHEDULER_MAJOR_CYCLE / ces->minor;
-
-    // Run start the time struct
-    scheduler_start(ces);
 
     unsigned i;
     // Get UNIX timestamp to be sychronized with the clock of the router, in seconds
@@ -185,7 +181,12 @@ void scheduler_run(scheduler_t *ces)
     // Round the obtained microsecond difference to a useconds_t type, which is what
     // we will haveto sleep to synchronize
     sync_sleep_time = (useconds_t) round(diff);
+    // And sleep the scheduler
     usleep(sync_sleep_time);
+
+    // Run start the time struct
+    scheduler_start(ces);
+
     // Loop through all minor cycles in a big major cycle
     while (1)
     {
