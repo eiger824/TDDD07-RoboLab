@@ -27,17 +27,14 @@
 // Major cycle to use
 #define     SCHEDULER_MAJOR_CYCLE           1000
 
-// Factor to use when calculating the deadlines
-#define     FACTOR                          1.1
-
-// Obtained WCETs from our measurements
-#define     wcet_TASK_MISSION               1
-#define     wcet_TASK_NAVIGATE              1
-#define     wcet_TASK_CONTROL               17
-#define     wcet_TASK_REFINE                11
-#define     wcet_TASK_REPORT                1
-#define     wcet_TASK_COMMUNICATE           5
-#define     wcet_TASK_AVOID                 17
+// Proposed periods (deadlines)
+#define     t_TASK_MISSION                  100
+#define     t_TASK_NAVIGATE                 100
+#define     t_TASK_CONTROL                  500
+#define     t_TASK_REFINE                   100
+#define     t_TASK_REPORT                   100
+#define     t_TASK_COMMUNICATE              1000
+#define     t_TASK_AVOID                    500
 
 // Array holding the deadline overruns for every task
 // There are only 7 valid tasks, but there is a NOP
@@ -249,89 +246,28 @@ void scheduler_run(scheduler_t *ces)
 int scheduler_get_deadline(int task_id)
 {
     /*
-     * We are going to assume a constant factor to calculate the
-     * deadlines of the tasks based on the WCETs.
-     *
-     * DEADLINE_k = WCET_k * PRIO_FACTOR
-     *
-     * So, for instance, if FACTOR = 1,
-     * it will mean that D_t = WCET_t;
-     *
-     * This factor has been chosen to be 1.1 since it provides a 10%
-     * safeguard for a given task above its WCET
-     *
-     * We know that except for minor cycles 0 and 5, a minor cycle looks
-     * as follows:
-     *
-     * |___________________________
-     * |  Navigate | REF| REP| MISS|
-     * |___________|____|____|_____|__________________________|
-     * 0                                                      100ms
-     *
-     * But in the special case of cycle 5, when all tasks run:
-     *
-     * |
-     * |_________________________________________________
-     * | Communicate| Navigate| CTRL| AVOID |REF|REP|MISS|
-     * |____________|_________|_____|_______|___|___|____|____|
-     * 0                                                      100ms
-     *
-     * That is why we take into consideration the 5th cycle to calculate
-     * the deadline for all tasks
+     * We are going to assume the deadlines of the tasks to be 
+     * the equal to the periods.
      */
-    int accumulate = 0;
     switch (task_id)
     {
         case 1 :// Mission
-            // Sum of all previous WCETs
-            accumulate += wcet_TASK_COMMUNICATE;
-            accumulate += wcet_TASK_NAVIGATE;
-            accumulate += wcet_TASK_CONTROL;
-            accumulate += wcet_TASK_AVOID;
-            accumulate += wcet_TASK_REFINE;
-            accumulate += wcet_TASK_REPORT;
-            accumulate += wcet_TASK_MISSION;
-            break;
+            return t_TASK_MISSION;
         case 2:// Navigate
-            accumulate += wcet_TASK_COMMUNICATE;
-            accumulate += wcet_TASK_NAVIGATE;
-            break;
+            return t_TASK_NAVIGATE;
         case 3:// Control
-            accumulate += wcet_TASK_COMMUNICATE;
-            accumulate += wcet_TASK_NAVIGATE;
-            accumulate += wcet_TASK_CONTROL;
-            break;
+            return t_TASK_CONTROL;
         case 4:// Refine
-            accumulate += wcet_TASK_COMMUNICATE;
-            accumulate += wcet_TASK_NAVIGATE;
-            accumulate += wcet_TASK_CONTROL;
-            accumulate += wcet_TASK_AVOID;
-            accumulate += wcet_TASK_REFINE;
-            break;
+            return t_TASK_REFINE;
         case 5:// Report
-            accumulate += wcet_TASK_COMMUNICATE;
-            accumulate += wcet_TASK_NAVIGATE;
-            accumulate += wcet_TASK_CONTROL;
-            accumulate += wcet_TASK_AVOID;
-            accumulate += wcet_TASK_REFINE;
-            accumulate += wcet_TASK_REPORT;
-            break;
+            return t_TASK_REPORT;
         case 6:// Communicate
-            accumulate += wcet_TASK_COMMUNICATE;
-            break;
+            return t_TASK_COMMUNICATE;
         case 7:// Avoid
-            accumulate += wcet_TASK_COMMUNICATE;
-            accumulate += wcet_TASK_NAVIGATE;
-            accumulate += wcet_TASK_CONTROL;
-            accumulate += wcet_TASK_AVOID;
-            break;
-        default:
-            // Wrong
+            return t_TASK_AVOID;
+        default:// Wrong
             return -1;
-
     }
-    // And return the accumulated time times the factor
-    return ceil((float) accumulate * FACTOR);
 }
 
 cnt_t scheduler_get_all_task_cnt()
