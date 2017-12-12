@@ -51,6 +51,10 @@ cnt_t total_communications;
 cnt_t total_victims;
 // Counter with victims whose location was not accurate
 cnt_t inaccurate_victims;
+// Counter with all desired data to send, according to types
+extern cnt_t total_data_count[4];
+// Counter with actual data sent
+extern cnt_t actual_data_count[4];
 
 
 /**

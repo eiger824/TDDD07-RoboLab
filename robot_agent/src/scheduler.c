@@ -53,6 +53,8 @@ static cnt_t runtime_tasks[NR_TASKS_TO_HANDLE + 1]      = {0};
 //sleep time to sync with mission countrol
 static useconds_t sync_sleep_time = 0;
 
+cnt_t total_data_count[4] = {0};
+cnt_t actual_data_count[4] = {0};
 /**
  * Initialize cyclic executive scheduler
  * @param minor Minor cycle in miliseconds (ms)
@@ -343,6 +345,12 @@ void scheduler_dump_statistics(scheduler_t *ces)
     printf("Number of inaccurate victim position reports:\t\t\t%llu (%.2f %%)\n",
             inaccurate_victims,
             100 * (((float)inaccurate_victims / (float)total_victims)));
+    printf("\nCommunication statistics:\n");
+    printf("data_type\t\tROBOT\tVICTIM\tPHEROMONE\tSTREAM\n");
+    printf("#_packets_2_send\t%llu\t%llu\t%llu\t%llu\n",
+            total_data_count[0], total_data_count[1], total_data_count[2], total_data_count[3]);
+    printf("#_packets_sent\t%llu\t%llu\t%llu\t%llu\n",
+            actual_data_count[0],actual_data_count[1],actual_data_count[2],actual_data_count[3]);
     printf("\nSummary of scheduler parameters:\n");
     printf("#_runs:\tNumber of times a given task has run\n");
     printf("#_do:\tNumber of deadline overruns a given task has experienced\n");

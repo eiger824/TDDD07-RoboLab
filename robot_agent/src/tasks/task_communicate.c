@@ -56,6 +56,8 @@ void task_communicate(void)
         //
         // Then, the next list(s) won't even be entered, just freed
 
+        // Add up total count
+        total_data_count[0] += g_list_send_robot->count;
         // Send robot data 
         if (packets_sent < max_allowed_packets)
         {
@@ -85,6 +87,8 @@ void task_communicate(void)
                     udp_broadcast(g_udps, udp_packet, udp_packet_len);
                     free(data);
                     ++packets_sent;
+                    // Add up actual packets sent from this data type
+                    ++actual_data_count[0];
                     ++total_communications;
                 }
                 else
@@ -102,6 +106,9 @@ void task_communicate(void)
             // Empty the list
             doublylinkedlist_empty(g_list_send_robot);
         }
+
+        // Add up total count
+        total_data_count[1] += g_list_send_victim->count;
         // Send victims
         if (packets_sent < max_allowed_packets)
         {
@@ -130,6 +137,8 @@ void task_communicate(void)
                     udp_broadcast(g_udps, udp_packet, udp_packet_len);
                     free(data);
                     ++packets_sent;
+                    // Add up sent packet
+                    ++actual_data_count[1];
                     ++total_communications;
                 }
                 else
@@ -154,6 +163,9 @@ void task_communicate(void)
             // Empty the list
             doublylinkedlist_empty(g_list_send_victim);
         }
+
+        // Add up total data count
+        total_data_count[2] += g_list_send_pheromones->count;
         // Send pheromones
         if (packets_sent < max_allowed_packets)
         {
@@ -182,6 +194,8 @@ void task_communicate(void)
                     udp_broadcast(g_udps, udp_packet, udp_packet_len);
                     free(data);
                     ++packets_sent;
+                    // Add up sent packet
+                    ++actual_data_count[2];
                     ++total_communications;
                 }
                 else
@@ -200,6 +214,7 @@ void task_communicate(void)
             doublylinkedlist_empty(g_list_send_pheromones);
         }
 
+        total_data_count[3] += g_list_send_stream->count;
         // Send stream data
         if (packets_sent < max_allowed_packets)
         {
@@ -230,6 +245,8 @@ void task_communicate(void)
                     udp_broadcast(g_udps, udp_packet, udp_packet_len);
                     free(data);
                     ++packets_sent;
+                    // Add up packet sent
+                    ++actual_data_count[3];
                     ++total_communications;
                 }
                 else
