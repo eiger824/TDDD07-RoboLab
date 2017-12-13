@@ -40,7 +40,13 @@ void task_communicate(void)
         //Start the new sequence
         int seq = 0; // Massi thing
         //In principle I want to send all the data in the buffer
-        int last_id = g_list_send->count; // Massi thing
+        int last_id = 0; // Massi thing
+        // Since we are using four lists, the last_id will be computed
+        // as the sum of the list lengths used
+        last_id += g_list_send_robot->count;
+        last_id += g_list_send_victim->count;
+        last_id += g_list_send_pheromones->count;
+        last_id += g_list_send_stream->count;
 
         /* Reasoning */
         // Go through the corresponding list if and only if the packet sent count
