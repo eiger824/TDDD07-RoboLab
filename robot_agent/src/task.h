@@ -55,6 +55,8 @@ cnt_t inaccurate_victims;
 extern cnt_t total_data_count[4];
 // Counter with actual data sent
 extern cnt_t actual_data_count[4];
+// Average of offset with the victims
+extern double victim_offset_average;
 
 
 /**

@@ -51,6 +51,9 @@ static useconds_t sync_sleep_time = 0;
 
 cnt_t total_data_count[4] = {0};
 cnt_t actual_data_count[4] = {0};
+
+// Average of offset with the victims
+double victim_offset_average;
 /**
  * Initialize cyclic executive scheduler
  * @param minor Minor cycle in miliseconds (ms)
@@ -319,6 +322,7 @@ void scheduler_dump_statistics(scheduler_t *ces)
     printf("Number of inaccurate victim position reports:\t\t\t%llu (%.2f %%)\n",
             inaccurate_victims,
             100 * (((float)inaccurate_victims / (float)total_victims)));
+    printf("Average distance to found victim:\t\t\t\t%f mm\n", victim_offset_average);
     printf("\nCommunication statistics:\n");
     printf("data_type\t\tROBOT\tVICTIM\tPHEROM\tSTREAM\n");
     printf("#_packets_2_send\t");

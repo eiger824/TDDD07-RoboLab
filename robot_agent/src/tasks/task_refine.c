@@ -12,6 +12,7 @@
 /* system libraries */
 #include <stdio.h>
 #include <stdlib.h>
+#include <math.h>
 /* project libraries */
 #include "task.h"
 #include "def.h"
@@ -46,6 +47,8 @@ static const victim_t VICTIM_TABLE[TOTAL_VICTIMS] =
     { 730,      3175,   "020056D0EF\0" },
     { 320,      1800,   "01004BDF7B\0" }
 };
+static double current_offset_value = 0.0;
+static int first_time = 1;
 
 /*
  * Function:	        check_accuracy_victim_location
@@ -69,7 +72,6 @@ void task_refine(void)
 	{
 		// Local variables
 		int res;
-
 		// Ping RFID reader
 #ifndef s_CONFIG_TEST_ENABLE
 		rfid_read(g_rfids);
@@ -113,10 +115,20 @@ void task_refine(void)
             }
             else
             {
-                fprintf(stderr, "Found victim's position innacurate, ID %s, x=%d,y=%d, offset=[%d,%d]\n",
-                        current_victim.id, current_victim.x, current_victim.y, dx, dy);
+                fprintf(stderr, "Found victim's position innacurate (ID %s)\n",
+                        current_victim.id);
                 // Add up failure counter
                 ++inaccurate_victims;
+                current_offset_value = sqrt(pow(dx,2) + pow(dx,2));
+                if (first_time)
+                {
+                    victim_offset_average = current_offset_value;
+                    first_time = 0;
+                }
+                else
+                {
+                    victim_offset_average = (victim_offset_average + current_offset_value) / 2;
+                }
             }
             // Add up victim counter
             ++total_victims;

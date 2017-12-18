@@ -1,6 +1,6 @@
 # Group (Number and Port)
 LAB_GROUP=A5
-LAB_GROUP_PORT=40002
+LAB_GROUP_PORT=40005
 
 # Robot (ID and IP)
 ROBOT_ID=5
