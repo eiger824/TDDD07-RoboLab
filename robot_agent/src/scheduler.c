@@ -210,10 +210,11 @@ void scheduler_run(scheduler_t *ces)
             {
                 /************************ Control task **************************/
                 scheduler_process_task(s_TASK_CONTROL_ID, &task_exec_time);
-                /************************ Avoid task ****************************/
-                scheduler_process_task(s_TASK_AVOID_ID, &task_exec_time);
-                /****************************************************************/
             }
+
+            /************************ Avoid task ****************************/
+            scheduler_process_task(s_TASK_AVOID_ID, &task_exec_time);
+            /****************************************************************/
 
             /************************ Refine task ***************************/
             scheduler_process_task(s_TASK_REFINE_ID, &task_exec_time);
