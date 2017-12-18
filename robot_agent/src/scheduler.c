@@ -314,7 +314,7 @@ void scheduler_dump_statistics(scheduler_t *ces)
     printf("Number of legal communications made (w go_ahead):\t\t%llu (%.2f %%)\n",
             total_communications - illegal_communications,
             100 * ((float) (total_communications - illegal_communications) / (float) total_communications));
-    printf("Number of total victim reports:\t\t\t\t%llu \n", total_victims);
+    printf("Number of total victim reports:\t\t\t\t\t%llu \n", total_victims);
     printf("Number of inaccurate victim position reports:\t\t\t%llu (%.2f %%)\n",
             inaccurate_victims,
             100 * (((float)inaccurate_victims / (float)total_victims)));
